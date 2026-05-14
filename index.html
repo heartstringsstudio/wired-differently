@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Wired Differently: A Practical Manual for Adults with High IQ and ADHD" />
+  <meta name="theme-color" content="#2D6A6A" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Wired Differently" />
+
+  <title>Wired Differently — A Practical Manual</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Icons (flag: these need to be generated — see icons/ directory) -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Preconnect for Google Fonts (loaded in CSS) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <a class="nav__brand" href="index.html" aria-label="Wired Differently home">
+      Wired Differently
+    </a>
+    <div class="nav__actions">
+      <!-- Theme toggle -->
+      <button class="nav__btn" id="theme-toggle" aria-label="Toggle dark mode">
+        <!-- Sun icon (shown in dark mode) -->
+        <svg class="icon-sun hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+                   M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <!-- Moon icon (shown in light mode) -->
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Cover / Landing Page -->
+  <main class="page" id="cover-page">
+    <section class="cover" aria-label="Book cover">
+
+      <p class="cover__eyebrow fade-in">A Practical Manual</p>
+
+      <h1 class="cover__title fade-in fade-in-delay-1">
+        <em>Wired</em><br>Differently
+      </h1>
+
+      <p class="cover__subtitle fade-in fade-in-delay-2">
+        For Adults with High IQ and ADHD — a clear-eyed, practical guide
+        to understanding how your brain actually works and building a life
+        that fits it.
+      </p>
+
+      <div class="cover__divider fade-in fade-in-delay-2" aria-hidden="true"></div>
+
+      <a href="toc.html" class="cover__enter-btn fade-in fade-in-delay-3"
+         aria-label="Open table of contents">
+        Begin Reading
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </a>
+
+      <p class="cover__resume fade-in fade-in-delay-4" id="resume-reading" aria-live="polite"></p>
+
+      <p class="cover__meta fade-in fade-in-delay-4" aria-hidden="true">
+        27 Chapters &nbsp;·&nbsp; Complete Manual
+      </p>
+
+    </section>
+  </main>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('js/sw.js').catch(() => {
+          // SW not yet built — silent fail during development
+        });
+      });
+    }
+  </script>
+
+  <!-- App Init -->
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      App.initCover();
+    });
+  </script>
+
+</body>
+</html>
