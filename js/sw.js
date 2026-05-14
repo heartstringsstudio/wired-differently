@@ -8,59 +8,59 @@ const CACHE_NAME = 'wired-differently-v1';
 
 const ASSETS = [
   /* Root */
-  '/',
-  '/index.html',
-  '/toc.html',
-  '/manifest.json',
+  '/wired-differently/',
+  '/wired-differently/index.html',
+  '/wired-differently/toc.html',
+  '/wired-differently/manifest.json',
 
   /* Styles */
-  '/css/style.css',
-  '/css/print.css',
+  '/wired-differently/css/style.css',
+  '/wired-differently/css/print.css',
 
   /* Scripts */
-  '/js/app.js',
+  '/wired-differently/js/app.js',
 
   /* Icons */
-  '/icons/icon.svg',
-  '/icons/icon-16.png',
-  '/icons/icon-32.png',
-  '/icons/icon-72.png',
-  '/icons/icon-96.png',
-  '/icons/icon-128.png',
-  '/icons/icon-144.png',
-  '/icons/icon-152.png',
-  '/icons/icon-180.png',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  '/wired-differently/icons/icon.svg',
+  '/wired-differently/icons/icon-16.png',
+  '/wired-differently/icons/icon-32.png',
+  '/wired-differently/icons/icon-72.png',
+  '/wired-differently/icons/icon-96.png',
+  '/wired-differently/icons/icon-128.png',
+  '/wired-differently/icons/icon-144.png',
+  '/wired-differently/icons/icon-152.png',
+  '/wired-differently/icons/icon-180.png',
+  '/wired-differently/icons/icon-192.png',
+  '/wired-differently/icons/icon-512.png',
 
   /* Chapters */
-  '/chapters/ch01.html',
-  '/chapters/ch02.html',
-  '/chapters/ch03.html',
-  '/chapters/ch04.html',
-  '/chapters/ch05.html',
-  '/chapters/ch06.html',
-  '/chapters/ch07.html',
-  '/chapters/ch08.html',
-  '/chapters/ch09.html',
-  '/chapters/ch10.html',
-  '/chapters/ch11.html',
-  '/chapters/ch12.html',
-  '/chapters/ch13.html',
-  '/chapters/ch14.html',
-  '/chapters/ch15.html',
-  '/chapters/ch16.html',
-  '/chapters/ch17.html',
-  '/chapters/ch18.html',
-  '/chapters/ch19.html',
-  '/chapters/ch20.html',
-  '/chapters/ch21.html',
-  '/chapters/ch22.html',
-  '/chapters/ch23.html',
-  '/chapters/ch24.html',
-  '/chapters/ch25.html',
-  '/chapters/ch26.html',
-  '/chapters/ch27.html',
+  '/wired-differently/chapters/ch01.html',
+  '/wired-differently/chapters/ch02.html',
+  '/wired-differently/chapters/ch03.html',
+  '/wired-differently/chapters/ch04.html',
+  '/wired-differently/chapters/ch05.html',
+  '/wired-differently/chapters/ch06.html',
+  '/wired-differently/chapters/ch07.html',
+  '/wired-differently/chapters/ch08.html',
+  '/wired-differently/chapters/ch09.html',
+  '/wired-differently/chapters/ch10.html',
+  '/wired-differently/chapters/ch11.html',
+  '/wired-differently/chapters/ch12.html',
+  '/wired-differently/chapters/ch13.html',
+  '/wired-differently/chapters/ch14.html',
+  '/wired-differently/chapters/ch15.html',
+  '/wired-differently/chapters/ch16.html',
+  '/wired-differently/chapters/ch17.html',
+  '/wired-differently/chapters/ch18.html',
+  '/wired-differently/chapters/ch19.html',
+  '/wired-differently/chapters/ch20.html',
+  '/wired-differently/chapters/ch21.html',
+  '/wired-differently/chapters/ch22.html',
+  '/wired-differently/chapters/ch23.html',
+  '/wired-differently/chapters/ch24.html',
+  '/wired-differently/chapters/ch25.html',
+  '/wired-differently/chapters/ch26.html',
+  '/wired-differently/chapters/ch27.html',
 ];
 
 /* ============================================================
@@ -135,7 +135,8 @@ self.addEventListener('fetch', event => {
           .catch(() => {
             /* Offline fallback for HTML pages */
             if (event.request.headers.get('accept')?.includes('text/html')) {
-              return caches.match('/index.html');
+              return caches.match('/wired-differently/index.html');
+
             }
           });
       })
