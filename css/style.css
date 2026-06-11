@@ -1225,3 +1225,29 @@ a:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   Cross-document View Transitions (chapter turns)
+   Progressive enhancement: supported browsers cross-fade the page
+   on same-origin navigation; others just navigate normally. Gated
+   behind no-preference so reduced-motion users get instant turns.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root) {
+    animation: wd-page-out 150ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+  ::view-transition-new(root) {
+    animation: wd-page-in 240ms cubic-bezier(0, 0, 0.2, 1) both;
+  }
+
+  @keyframes wd-page-out {
+    to { opacity: 0; }
+  }
+  @keyframes wd-page-in {
+    from { opacity: 0; transform: translateY(8px); }
+  }
+}

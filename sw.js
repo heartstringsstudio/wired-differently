@@ -4,7 +4,7 @@
  * Version the cache name to force updates when files change
  */
 
-const CACHE_NAME = 'wired-differently-v3';
+const CACHE_NAME = 'wired-differently-v4';
 
 const ASSETS = [
   /* Root */
