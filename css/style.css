@@ -743,6 +743,192 @@ a:hover {
 }
 
 /* ============================================================
+   Worksheets (Chapter 23)
+   ============================================================ */
+.worksheet-section {
+  margin-bottom: var(--space-3xl);
+}
+
+.worksheet-field {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.25rem 0;
+  transition: border-color var(--transition-fast);
+}
+
+.worksheet-field--inline {
+  width: auto;
+  flex: 1;
+  min-width: 8rem;
+}
+
+.worksheet-field--short {
+  min-width: 4rem;
+  flex: 0 1 6rem;
+}
+
+.worksheet-textarea {
+  display: block;
+  width: 100%;
+  min-height: 4rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  padding: var(--space-sm) var(--space-md);
+  resize: vertical;
+  margin-bottom: 1.5em;
+  transition: border-color var(--transition-fast);
+}
+
+.worksheet-field:focus,
+.worksheet-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.prose .worksheet-checks {
+  list-style: none;
+  padding-left: 0;
+}
+
+.worksheet-checks li {
+  margin-bottom: 0.6em;
+}
+
+.worksheet-checks label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.prose .worksheet-lines li {
+  margin-bottom: 0.75em;
+}
+
+.worksheet-checks input[type="checkbox"],
+.worksheet-scale input[type="radio"],
+.worksheet-options input[type="radio"],
+.worksheet-table input[type="radio"] {
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.worksheet-scale {
+  border: none;
+  padding: 0;
+  margin: 0 0 1.5em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-md);
+}
+
+.worksheet-scale legend {
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.worksheet-scale label,
+.worksheet-options label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.worksheet-options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-xs);
+}
+
+.worksheet-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: 1em;
+}
+
+.worksheet-response {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin: var(--space-xs) 0 0 1.75rem;
+}
+
+.prose .worksheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-lg) 0 1.5em;
+  font-size: 0.9375rem;
+}
+
+.worksheet-table th,
+.worksheet-table td {
+  border: 1px solid var(--border);
+  padding: var(--space-sm);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.worksheet-table thead th {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+.worksheet-table tbody th {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.worksheet-table .worksheet-field {
+  border-bottom: none;
+  padding: 0;
+}
+
+.worksheet-table--tracker td {
+  text-align: center;
+}
+
+.worksheet-table--tracker td:last-child {
+  text-align: left;
+  min-width: 6rem;
+}
+
+/* Tracker table needs room on small screens */
+@media (max-width: 640px) {
+  .worksheet-table--tracker {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* ============================================================
    Chapter Navigation Footer
    ============================================================ */
 .chapter-nav {
