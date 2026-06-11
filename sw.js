@@ -4,7 +4,7 @@
  * Version the cache name to force updates when files change
  */
 
-const CACHE_NAME = 'wired-differently-v1';
+const CACHE_NAME = 'wired-differently-v2';
 
 const ASSETS = [
   /* Root */
@@ -20,8 +20,10 @@ const ASSETS = [
   /* Scripts */
   '/wired-differently/js/app.js',
 
+  /* Offline fallback */
+  '/wired-differently/offline.html',
+
   /* Icons */
-  '/wired-differently/icons/icon.svg',
   '/wired-differently/icons/icon-16.png',
   '/wired-differently/icons/icon-32.png',
   '/wired-differently/icons/icon-72.png',
@@ -135,8 +137,7 @@ self.addEventListener('fetch', event => {
           .catch(() => {
             /* Offline fallback for HTML pages */
             if (event.request.headers.get('accept')?.includes('text/html')) {
-              return caches.match('/wired-differently/index.html');
-
+              return caches.match('/wired-differently/offline.html');
             }
           });
       })
