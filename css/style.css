@@ -3,8 +3,31 @@
    Warm, book-like reading experience. No framework. No noise.
    ============================================================ */
 
-/* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap');
+/* --- Self-hosted fonts (latin subset, variable woff2) ---
+   Served from /fonts to remove the render-blocking external request
+   and guarantee correct rendering offline. Each face is a variable
+   font; the weight range covers every weight used in the design. */
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('../fonts/lora-var.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url('../fonts/lora-var-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 300 600;
+  font-display: swap;
+  src: url('../fonts/dmsans-var.woff2') format('woff2');
+}
 
 /* ============================================================
    CSS Custom Properties — Light Mode (default)
