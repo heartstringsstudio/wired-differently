@@ -220,6 +220,21 @@ const ReadingProgressBar = {
 };
 
 /* ============================================================
+   Paths — base-path-agnostic URLs
+   Mirrors the relative-link convention used by the static HTML so
+   navigation works whether the app is served at the domain root or
+   under a subpath (e.g. /wired-differently/). Never hard-code a
+   leading slash here — that would break the deployed base path.
+   ============================================================ */
+const Paths = {
+  inChapters() { return /\/chapters\//.test(window.location.pathname); },
+  root()       { return this.inChapters() ? '../' : ''; },
+  toc()        { return this.root() + 'toc.html'; },
+  index()      { return this.root() + 'index.html'; },
+  chapter(id)  { return this.root() + 'chapters/' + id + '.html'; }
+};
+
+/* ============================================================
    Navigation — Chapter-to-Chapter
    ============================================================ */
 const Nav = {
@@ -233,13 +248,13 @@ const Nav = {
     return CHAPTERS.find(c => c.num === num) || null;
   },
   goToTOC() {
-    window.location.href = '/toc.html';
+    window.location.href = Paths.toc();
   },
   goToChapter(chId) {
-    window.location.href = '/chapters/' + chId + '.html';
+    window.location.href = Paths.chapter(chId);
   },
   goToCover() {
-    window.location.href = '/index.html';
+    window.location.href = Paths.index();
   }
 };
 
@@ -330,7 +345,7 @@ const CoverResume = {
     if (!ch) return;
     const el = document.getElementById('resume-reading');
     if (!el) return;
-    el.innerHTML = `Resume: <a href="/chapters/${ch.id}.html">Chapter ${ch.num} — ${ch.title}</a>`;
+    el.innerHTML = `Resume: <a href="${Paths.chapter(ch.id)}">Chapter ${ch.num} — ${ch.title}</a>`;
     el.classList.add('visible');
   }
 };
@@ -362,15 +377,17 @@ const TOCState = {
 const KeyboardNav = {
   init(chapterNum) {
     document.addEventListener('keydown', e => {
-      // Don't fire in inputs
+      // Don't fire in inputs, or when a modifier is held
       if (e.target.matches('input, textarea, select')) return;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Left/Right turn pages; Up/Down are left alone for normal scrolling
+      if (e.key === 'ArrowLeft') {
         const prev = Nav.getChapterByNum(chapterNum - 1);
-        if (prev) window.location.href = '/chapters/' + prev.id + '.html';
+        if (prev) window.location.href = Paths.chapter(prev.id);
       }
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (e.key === 'ArrowRight') {
         const next = Nav.getChapterByNum(chapterNum + 1);
-        if (next) window.location.href = '/chapters/' + next.id + '.html';
+        if (next) window.location.href = Paths.chapter(next.id);
       }
       if (e.key === 't' || e.key === 'T') Nav.goToTOC();
       if (e.key === 'b' || e.key === 'B') BookmarkUI.init && document.getElementById('bookmark-btn')?.click();
