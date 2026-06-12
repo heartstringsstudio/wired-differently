@@ -220,6 +220,21 @@ const ReadingProgressBar = {
 };
 
 /* ============================================================
+   Paths — base-path-agnostic URLs
+   Mirrors the relative-link convention used by the static HTML so
+   navigation works whether the app is served at the domain root or
+   under a subpath (e.g. /wired-differently/). Never hard-code a
+   leading slash here — that would break the deployed base path.
+   ============================================================ */
+const Paths = {
+  inChapters() { return /\/chapters\//.test(window.location.pathname); },
+  root()       { return this.inChapters() ? '../' : ''; },
+  toc()        { return this.root() + 'toc.html'; },
+  index()      { return this.root() + 'index.html'; },
+  chapter(id)  { return this.root() + 'chapters/' + id + '.html'; }
+};
+
+/* ============================================================
    Navigation — Chapter-to-Chapter
    ============================================================ */
 const Nav = {
@@ -233,13 +248,13 @@ const Nav = {
     return CHAPTERS.find(c => c.num === num) || null;
   },
   goToTOC() {
-    window.location.href = '/toc.html';
+    window.location.href = Paths.toc();
   },
   goToChapter(chId) {
-    window.location.href = '/chapters/' + chId + '.html';
+    window.location.href = Paths.chapter(chId);
   },
   goToCover() {
-    window.location.href = '/index.html';
+    window.location.href = Paths.index();
   }
 };
 
@@ -320,6 +335,57 @@ const BookmarkUI = {
 };
 
 /* ============================================================
+   Bookmark List (TOC page)
+   Renders saved bookmarks as a section at the top of the TOC, in
+   chapter order, each row matching the native .toc__link styling
+   with an inline remove control. Hidden entirely when empty.
+   ============================================================ */
+const BookmarkList = {
+  init() {
+    this.section = document.getElementById('toc-bookmarks');
+    this.list = document.getElementById('bookmark-list');
+    if (!this.section || !this.list) return;
+    this.render();
+  },
+  render() {
+    const ids = Bookmarks.getAll();
+    // Show in chapter order regardless of when each was added
+    const items = CHAPTERS.filter(c => ids.includes(c.id));
+    if (items.length === 0) {
+      this.section.hidden = true;
+      this.list.innerHTML = '';
+      return;
+    }
+    this.section.hidden = false;
+    this.list.innerHTML = items.map(ch => `
+      <li class="toc__item bookmark-item" data-ch="${ch.id}">
+        <a class="toc__link" href="${Paths.chapter(ch.id)}"
+           aria-label="Bookmarked — Chapter ${ch.num}: ${this._esc(ch.title)}">
+          <span class="toc__ch-num">Ch. ${ch.num}</span>
+          <span class="toc__ch-content">
+            <span class="toc__ch-title">${this._esc(ch.title)}</span>
+            <span class="toc__ch-subtitle">${this._esc(ch.subtitle)}</span>
+          </span>
+        </a>
+        <button class="bookmark-remove" type="button"
+                aria-label="Remove bookmark for Chapter ${ch.num}">&times;</button>
+      </li>`).join('');
+
+    this.list.querySelectorAll('.bookmark-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = e.currentTarget.closest('.bookmark-item').dataset.ch;
+        Bookmarks.toggle(id); // toggling an existing bookmark removes it
+        this.render();
+      });
+    });
+  },
+  _esc(s) {
+    return String(s).replace(/[&<>"]/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+};
+
+/* ============================================================
    Cover Page — Resume Reading Link
    ============================================================ */
 const CoverResume = {
@@ -330,7 +396,7 @@ const CoverResume = {
     if (!ch) return;
     const el = document.getElementById('resume-reading');
     if (!el) return;
-    el.innerHTML = `Resume: <a href="/chapters/${ch.id}.html">Chapter ${ch.num} — ${ch.title}</a>`;
+    el.innerHTML = `Resume: <a href="${Paths.chapter(ch.id)}">Chapter ${ch.num} — ${ch.title}</a>`;
     el.classList.add('visible');
   }
 };
@@ -362,15 +428,17 @@ const TOCState = {
 const KeyboardNav = {
   init(chapterNum) {
     document.addEventListener('keydown', e => {
-      // Don't fire in inputs
+      // Don't fire in inputs, or when a modifier is held
       if (e.target.matches('input, textarea, select')) return;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Left/Right turn pages; Up/Down are left alone for normal scrolling
+      if (e.key === 'ArrowLeft') {
         const prev = Nav.getChapterByNum(chapterNum - 1);
-        if (prev) window.location.href = '/chapters/' + prev.id + '.html';
+        if (prev) window.location.href = Paths.chapter(prev.id);
       }
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (e.key === 'ArrowRight') {
         const next = Nav.getChapterByNum(chapterNum + 1);
-        if (next) window.location.href = '/chapters/' + next.id + '.html';
+        if (next) window.location.href = Paths.chapter(next.id);
       }
       if (e.key === 't' || e.key === 'T') Nav.goToTOC();
       if (e.key === 'b' || e.key === 'B') BookmarkUI.init && document.getElementById('bookmark-btn')?.click();
@@ -393,6 +461,7 @@ const App = {
     Theme.init();
     FontSize.init();
     TOCState.init();
+    BookmarkList.init();
     this._bindThemeToggle();
   },
 
@@ -409,9 +478,9 @@ const App = {
     if (ch) {
       KeyboardNav.init(ch.num);
       Progress.saveLastChapter(chId);
-      // Update nav label
+      // Update nav label with position context ("Ch. 5 of 27 — Title")
       const label = document.querySelector('.nav__chapter-label');
-      if (label) label.textContent = `Ch. ${ch.num} — ${ch.title}`;
+      if (label) label.textContent = `Ch. ${ch.num} of ${CHAPTERS.length} — ${ch.title}`;
       document.body.classList.add('is-chapter');
     }
     this._bindThemeToggle();

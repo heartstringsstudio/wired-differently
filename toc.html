@@ -3,6 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script>
+    /* Apply saved theme + font size before first paint to prevent FOUC */
+    (function () {
+      try {
+        var d = document.documentElement, s = localStorage;
+        var t = s.getItem('wired_darkMode');
+        var dark = t !== null ? JSON.parse(t)
+                              : matchMedia('(prefers-color-scheme: dark)').matches;
+        d.setAttribute('data-theme', dark ? 'dark' : 'light');
+        var f = s.getItem('wired_fontSize');
+        if (f) d.setAttribute('data-font-size', JSON.parse(f));
+      } catch (e) {}
+    })();
+  </script>
+
   <meta name="description" content="Table of Contents — Wired Differently: A Practical Manual for Adults with High IQ and ADHD" />
   <meta name="theme-color" content="#2D6A6A" />
 
@@ -13,8 +29,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
 
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" href="fonts/lora-var.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 <body>
 
@@ -57,6 +72,16 @@
           <span class="toc__progress-label" id="toc-progress-label">0% complete</span>
         </div>
       </header>
+
+      <!-- Bookmarks — populated by JS, shown only when bookmarks exist -->
+      <section class="toc__part toc__bookmarks fade-in" id="toc-bookmarks" hidden
+               aria-labelledby="bookmarks-heading">
+        <h2 class="toc__part-header" id="bookmarks-heading">
+          <span class="toc__part-number" aria-hidden="true">★</span>
+          <span class="toc__part-title">Bookmarks</span>
+        </h2>
+        <ol class="toc__list" id="bookmark-list" aria-label="Bookmarked chapters"></ol>
+      </section>
 
       <!-- ===================================================
            PART ONE — Understanding the Profile

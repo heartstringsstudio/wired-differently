@@ -4,7 +4,7 @@
  * Version the cache name to force updates when files change
  */
 
-const CACHE_NAME = 'wired-differently-v1';
+const CACHE_NAME = 'wired-differently-v6';
 
 const ASSETS = [
   /* Root */
@@ -20,8 +20,15 @@ const ASSETS = [
   /* Scripts */
   '/wired-differently/js/app.js',
 
+  /* Fonts (self-hosted, latin subset) */
+  '/wired-differently/fonts/lora-var.woff2',
+  '/wired-differently/fonts/lora-var-italic.woff2',
+  '/wired-differently/fonts/dmsans-var.woff2',
+
+  /* Offline fallback */
+  '/wired-differently/offline.html',
+
   /* Icons */
-  '/wired-differently/icons/icon.svg',
   '/wired-differently/icons/icon-16.png',
   '/wired-differently/icons/icon-32.png',
   '/wired-differently/icons/icon-72.png',
@@ -96,25 +103,9 @@ self.addEventListener('fetch', event => {
   /* Only handle GET requests */
   if (event.request.method !== 'GET') return;
 
-  /* Skip cross-origin requests (Google Fonts etc) */
+  /* Skip cross-origin requests — all assets (incl. fonts) are same-origin now */
   const url = new URL(event.request.url);
-  if (url.origin !== location.origin) {
-    /* For Google Fonts: try network, fall back gracefully */
-    if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-      event.respondWith(
-        caches.open(CACHE_NAME + '-fonts').then(fontCache =>
-          fontCache.match(event.request).then(cached => {
-            if (cached) return cached;
-            return fetch(event.request).then(response => {
-              fontCache.put(event.request, response.clone());
-              return response;
-            }).catch(() => new Response('', { status: 408 }));
-          })
-        )
-      );
-    }
-    return;
-  }
+  if (url.origin !== location.origin) return;
 
   event.respondWith(
     caches.match(event.request)
@@ -135,8 +126,7 @@ self.addEventListener('fetch', event => {
           .catch(() => {
             /* Offline fallback for HTML pages */
             if (event.request.headers.get('accept')?.includes('text/html')) {
-              return caches.match('/wired-differently/index.html');
-
+              return caches.match('/wired-differently/offline.html');
             }
           });
       })

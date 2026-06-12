@@ -3,6 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script>
+    /* Apply saved theme + font size before first paint to prevent FOUC */
+    (function () {
+      try {
+        var d = document.documentElement, s = localStorage;
+        var t = s.getItem('wired_darkMode');
+        var dark = t !== null ? JSON.parse(t)
+                              : matchMedia('(prefers-color-scheme: dark)').matches;
+        d.setAttribute('data-theme', dark ? 'dark' : 'light');
+        var f = s.getItem('wired_fontSize');
+        if (f) d.setAttribute('data-font-size', JSON.parse(f));
+      } catch (e) {}
+    })();
+  </script>
+
   <meta name="description" content="Chapter 19: Burnout and Recovery — Wired Differently" />
   <meta name="theme-color" content="#2D6A6A" />
   <title>Ch. 19: Burnout and Recovery — Wired Differently</title>
@@ -10,8 +26,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="../icons/icon-180.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="../icons/icon-32.png" />
   <link rel="stylesheet" href="../css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" href="../fonts/lora-var.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 <body data-ch-id="ch19" data-ch-num="19">
 
@@ -44,37 +59,288 @@
 
       <header class="chapter-header fade-in">
         <p class="chapter-header__part">Part Five &nbsp;·&nbsp; Sustainability</p>
-        <p class="chapter-header__number">Chapter 19</p>
+        <p class="chapter-header__number">Chapter 19 <span class="chapter-header__of">of 27</span></p>
         <h1 class="chapter-header__title" id="chapter-title">Burnout and Recovery</h1>
         <p class="chapter-header__subtitle">When the Compensation System Finally Runs Out</p>
       </header>
 
       <div class="prose fade-in fade-in-delay-1" id="chapter-content">
-<p>There is a specific kind of crisis that high-IQ ADHD adults describe, often with a mixture of genuine bewilderment and exhausted recognition, that goes something like this: Everything was fine. Or at least everything appeared to be fine. The work was getting done — barely, sometimes, but getting done. The relationships were being maintained — imperfectly, with considerable backstage effort, but maintained. The systems were holding — duct-taped and fraying at the edges, but holding. And then, without any single catastrophic event to point to, something gave. Not a breakdown in the dramatic, cinematic sense. Something quieter and more total: a depletion of the resource that was making all of it possible. The compensation strategies that have been running continuously — the willpower applications, the crisis-mode sprints, the masking performances, the elaborate workarounds — stop working. Not gradually. Sometimes overnight. The person who was managing, however expensively, finds that the management capacity itself has been exhausted. This is ADHD burnout. It is distinct from ordinary tiredness, from clinical depression, from garden-variety overwork. It is the specific, predictable consequence of running a high-demand compensatory system — largely alone, often without adequate support, and frequently without even knowing that's what was happening — for months or years beyond its sustainable capacity. For high-IQ ADHD adults, burnout arrives with a particular cruelty: it tends to collapse precisely the capabilities that have been most central to functioning. The verbal fluency that was the most reliable masking tool may become inaccessible. The crisis-mode productivity that was the last reliable work mechanism may stop activating. The social performance that maintained professional relationships may become impossible to sustain. The very intelligence that was financing the compensation finally finds that the credit has run out. Understanding burnout — what it is, why it happens, how it presents, and what actually helps — is not optional maintenance material for high-IQ ADHD adults. For many, it is the most urgent practical information in this manual.</p>
-<p>What ADHD Burnout Is — and What It Isn't</p>
-<p>ADHD burnout is not a formally codified diagnostic category in the clinical literature, though the concept is widely recognized among ADHD specialists and richly described in first-person accounts. It overlaps with — but is distinct from — several conditions that do have formal status. ADHD burnout versus clinical depression ADHD burnout and depression share significant surface features: low energy, reduced motivation, social withdrawal, difficulty with daily functioning, negative self-evaluation, and a loss of the capacity for pleasure in previously enjoyable activities. The distinction matters for treatment: depression has specific pharmacological and psychological interventions that differ from the interventions most relevant to ADHD burnout. And the two can coexist — ADHD burnout can trigger or deepen a depressive episode in someone with vulnerability to depression, and untreated depression will deepen and prolong ADHD burnout. Clinically, several features help distinguish ADHD burnout from primary depression: ADHD burnout typically has a more identifiable precipitating period — a phase of extended overload, high demand, inadequate support, or accumulated stress that precedes the collapse. Depression can arrive without such a clear precipitant. ADHD burnout often shows more variability across the day and across environmental conditions than the more pervasive low of depression — moments of genuine engagement or energy that punctuate the overall depletion, typically in conditions of genuine interest or low demand. ADHD burnout is more directly responsive to removal of demand and genuine rest than depression, which tends to persist even in low-demand, low-stress conditions. If there is genuine uncertainty about which is present — or if both are suspected — professional evaluation is indicated. The treatments are complementary in some respects and the distinction matters in others. ADHD burnout versus autistic burnout For twice-exceptional adults who carry both ADHD and autism spectrum traits — a common profile, as described in Chapter 4 — autistic burnout and ADHD burnout may be difficult to distinguish and may co-occur. Autistic burnout, described in the emerging research literature, involves a specific depletion of the masking and compensatory resources required to navigate a neurotypical world — a description that has significant overlap with the ADHD burnout experience.</p>
-<p>The practical implication for people who recognize features of both profiles: the recovery strategies that help ADHD burnout — rest, demand reduction, environmental accommodation, neurological support through treatment — are largely compatible with autistic burnout recovery as well. The distinction is more relevant for understanding the full picture of what is being managed than for determining the immediate recovery approach. ADHD burnout versus ordinary overwork Ordinary overwork produces tiredness that resolves with rest. A holiday, a week of reduced demand, adequate sleep — these restore the depleted resource. ADHD burnout does not resolve with simple rest, because the depleted resource is not physical energy. It is neurological — the executive function, regulatory capacity, and compensatory machinery that the ADHD brain has been running at above-sustainable output. Restoring it requires more than sleep, though sleep is necessary. It requires genuine reduction of the demands that were consuming the resource, specific recovery of the neurological systems that have been most taxed, and often a structural reassessment of the conditions that produced the burnout in the first place. Why High-Achieving ADHD Adults Are Specifically Vulnerable ADHD burnout can affect any adult with ADHD. High-achieving ADHD adults — those whose intelligence, drive, and compensatory capacity have allowed them to maintain functioning at high levels for extended periods — are specifically vulnerable for reasons worth understanding clearly. The masking cost accumulates invisibly The effort of maintaining a neurotypical-appearing performance — the social monitoring, the impulse suppression, the attention management, the working memory compensation — has a real neurological cost that is essentially invisible to anyone observing the performance. The performance looks effortless. The effort behind it is anything but. Because the cost is invisible, it is rarely accounted for in workload assessment, self-management planning, or the expectations of employers, partners, or the person themselves. The high-achieving ADHD adult who appears to be managing well is also, simultaneously, spending enormous neurological resources on the management of appearing to manage well. This cost is added to the already elevated cognitive load of compensating for executive dysfunction, without being recognized or offset.</p>
-<p>Over time, this invisible cost accumulates. There is no mechanism for drawing it down to a sustainable level when the person doing the spending doesn't know how much they're spending, and neither does anyone else. The high floor creates a burnout pressure cooker High-achieving ADHD adults have often set — or been assigned — a high performance floor: a baseline expectation of output and functioning that reflects their demonstrated capacity at its best. The expectation, once established, applies continuously rather than only during the high-activation periods that produced it. The pressure to maintain the high floor across variable activation states — to produce at peak-week levels during low-activation weeks, to perform at the same level regardless of sleep, stress, or neurological state — requires the kind of sustained effortful compensation that is precisely what produces burnout. The high floor that demonstrates genuine capability also creates the conditions for the most dramatic burnout: the further the performance baseline is from the ADHD brain's natural, unsupported floor, the more effort is required to maintain it, and the greater the collapse when that effort is no longer available. Late diagnosis means longer accumulation For ADHD adults who are diagnosed late — in their thirties, forties, or beyond — the burnout arrives after a longer accumulation period than for those diagnosed and supported earlier. Decades of unrecognized compensation, without the structural supports that accurate understanding and effective treatment provide, produces a particularly deep depletion. The burnout may be the first unmistakable symptom that something has been wrong for a very long time. The inability to ask for help that is relevant Asking for help with the specific things that are most depleting requires being able to name them — which requires having a framework for understanding what is happening. High-achieving ADHD adults who don't have the diagnosis, or who have it but haven't connected it to the specific mechanisms of their depletion, cannot effectively request the support that would help. They may ask for general support that doesn't address the actual problem, or they may not ask at all, because nothing in their framework explains why someone with their apparent capacity would need help with what they need help with.</p>
-<p>The Warning Signs ADHD burnout typically has a prodrome — a period of warning signs that precede the collapse. Recognizing these signs, and taking them seriously rather than pushing through them, is significantly more productive than reaching the full burnout state and then attempting recovery. Common warning signs include: Increasing reliance on urgency for all functioning When the urgency-based activation that normally operates alongside other activation mechanisms becomes the only mechanism that works at all — when tasks are only ever getting done in the final crisis window, and the mechanisms that previously provided early-stage activation have stopped functioning — the compensatory system is showing its overload. Systems that were working beginning to fail The calendar that was being maintained stops being checked. The capture system that was being used stops being used. The weekly reset that was happening stops happening. Each of these system failures represents the depletion of the executive function maintenance that was keeping them running — and each failed system increases the disorder and demand that further depletes the available resource. Emotional dysregulation becoming more frequent and more intense As executive function reserves deplete, emotional regulation — which shares the same prefrontal regulatory substrate — degrades. Emotional responses that were previously managed become less manageable. Frustration arrives faster and at higher intensity. The recovery time from emotional activation lengthens. The gap between stimulus and response narrows to the point where the pause protocols that normally work become inaccessible. Physical symptoms Sleep disruption worsening beyond the ADHD baseline. Fatigue that doesn't resolve with sleep. Headaches, muscle tension, gastrointestinal symptoms, and other physical manifestations of chronic stress activation. The body's stress response has been running at elevated levels for extended periods, and its symptoms are becoming impossible to ignore.</p>
-<h2>Social withdrawal and reduced communication</h2>
-<p>Reducing social contact, letting messages accumulate without response, canceling plans with increasing frequency, declining invitations, and withdrawing from relationships that require energy — these are both symptoms of the depletion and responses to it. The social performance that masking requires is one of the first capacities to deplete, and the withdrawal is the nervous system's attempt to remove a major source of demand. The inability to access previously reliable strengths When the specific capabilities that have been most central to functioning — the verbal fluency, the crisis performance, the creative output, the rapid learning — become inaccessible, this is a significant warning sign. These are typically the last strengths to be affected by ordinary fatigue. Their loss signals a depth of depletion that goes beyond tiredness. Anhedonia in previously meaningful activities When activities that were genuinely engaging — creative work, professional challenges, relationships, hobbies — no longer produce the activation or pleasure they previously did, the neurological reward system is showing the effects of sustained depletion. This is among the most alarming signs because it removes the very mechanisms — genuine interest, personal meaning — that would otherwise support recovery motivation. The Recovery Process Recovery from ADHD burnout is not a single intervention. It is a process — typically longer than the person hopes and shorter than they fear — that requires specific components in roughly sequential order. Stage 1: Stop the Bleeding The first requirement of burnout recovery is the reduction of ongoing demand to the level that the depleted system can actually sustain — not the level that was being sustained before the collapse, which was clearly unsustainable, but the minimum viable functioning level that allows partial recovery to begin. This is often the hardest stage because it requires things that feel like failure: postponing commitments, reducing professional output, withdrawing from social obligations, and in some cases taking a formal leave of absence or significantly restructuring work demands. These</p>
-<p>actions conflict with the high-achiever identity, the performance standard, and the shame about needing accommodation that many high-IQ ADHD adults carry. They are nevertheless necessary. Attempting to recover while maintaining the demand level that produced the burnout is equivalent to trying to heal a broken bone while continuing to walk on it. The intention is good. The physiology doesn't permit it. Practical actions in Stage 1:</p>
+<p>There is a specific kind of crisis that high-IQ ADHD adults describe, often with a mixture of genuine bewilderment and exhausted recognition, that goes something like this:</p>
+
+<p>Everything was fine. Or at least everything appeared to be fine. The work was getting done — barely, sometimes, but getting done. The relationships were being maintained — imperfectly, with considerable backstage effort, but maintained. The systems were holding — duct-taped and fraying at the edges, but holding.</p>
+
+<p>And then, without any single catastrophic event to point to, something gave. Not a breakdown in the dramatic, cinematic sense. Something quieter and more total: a depletion of the resource that was making all of it possible.</p>
+
+<p>The compensation strategies that have been running continuously — the willpower applications, the crisis-mode sprints, the masking performances, the elaborate workarounds — stop working. Not gradually. Sometimes overnight. The person who was managing, however expensively, finds that the management capacity itself has been exhausted.</p>
+
+<p>This is ADHD burnout. It is distinct from ordinary tiredness, from clinical depression, from garden-variety overwork. It is the specific, predictable consequence of running a high-demand compensatory system — largely alone, often without adequate support, and frequently without even knowing that's what was happening — for months or years beyond its sustainable capacity.</p>
+
+<p>For high-IQ ADHD adults, burnout arrives with a particular cruelty: it tends to collapse precisely the capabilities that have been most central to functioning. The verbal fluency that was the most reliable masking tool may become inaccessible. The crisis-mode productivity that was the last reliable work mechanism may stop activating. The social performance that maintained professional relationships may become impossible to sustain. The very intelligence that was financing the compensation finally finds that the credit has run out.</p>
+
+<p>Understanding burnout — what it is, why it happens, how it presents, and what actually helps — is not optional maintenance material for high-IQ ADHD adults. For many, it is the most urgent practical information in this manual.</p>
+
+<h2>What ADHD Burnout Is — and What It Isn't</h2>
+
+<p>ADHD burnout is not a formally codified diagnostic category in the clinical literature, though the concept is widely recognized among ADHD specialists and richly described in first-person accounts. It overlaps with — but is distinct from — several conditions that do have formal status.</p>
+
+<h3>ADHD burnout versus clinical depression</h3>
+
+<p>ADHD burnout and depression share significant surface features: low energy, reduced motivation, social withdrawal, difficulty with daily functioning, negative self-evaluation, and a loss of the capacity for pleasure in previously enjoyable activities.</p>
+
+<p>The distinction matters for treatment: depression has specific pharmacological and psychological interventions that differ from the interventions most relevant to ADHD burnout. And the two can coexist — ADHD burnout can trigger or deepen a depressive episode in someone with vulnerability to depression, and untreated depression will deepen and prolong ADHD burnout.</p>
+
+<p>Clinically, several features help distinguish ADHD burnout from primary depression: ADHD burnout typically has a more identifiable precipitating period — a phase of extended overload, high demand, inadequate support, or accumulated stress that precedes the collapse. Depression can arrive without such a clear precipitant.</p>
+
+<p>ADHD burnout often shows more variability across the day and across environmental conditions than the more pervasive low of depression — moments of genuine engagement or energy that punctuate the overall depletion, typically in conditions of genuine interest or low demand.</p>
+
+<p>ADHD burnout is more directly responsive to removal of demand and genuine rest than depression, which tends to persist even in low-demand, low-stress conditions.</p>
+
+<p>If there is genuine uncertainty about which is present — or if both are suspected — professional evaluation is indicated. The treatments are complementary in some respects and the distinction matters in others.</p>
+
+<h3>ADHD burnout versus autistic burnout</h3>
+
+<p>For twice-exceptional adults who carry both ADHD and autism spectrum traits — a common profile, as described in Chapter 4 — autistic burnout and ADHD burnout may be difficult to distinguish and may co-occur.</p>
+
+<p>Autistic burnout, described in the emerging research literature, involves a specific depletion of the masking and compensatory resources required to navigate a neurotypical world — a description that has significant overlap with the ADHD burnout experience.</p>
+
+<p>The practical implication for people who recognize features of both profiles: the recovery strategies that help ADHD burnout — rest, demand reduction, environmental accommodation, neurological support through treatment — are largely compatible with autistic burnout recovery as well. The distinction is more relevant for understanding the full picture of what is being managed than for determining the immediate recovery approach.</p>
+
+<h3>ADHD burnout versus ordinary overwork</h3>
+
+<p>Ordinary overwork produces tiredness that resolves with rest. A holiday, a week of reduced demand, adequate sleep — these restore the depleted resource.</p>
+
+<p>ADHD burnout does not resolve with simple rest, because the depleted resource is not physical energy. It is neurological — the executive function, regulatory capacity, and compensatory machinery that the ADHD brain has been running at above-sustainable output.</p>
+
+<p>Restoring it requires more than sleep, though sleep is necessary. It requires genuine reduction of the demands that were consuming the resource, specific recovery of the neurological systems that have been most taxed, and often a structural reassessment of the conditions that produced the burnout in the first place.</p>
+
+<h2>Why High-Achieving ADHD Adults Are Specifically Vulnerable</h2>
+
+<p>ADHD burnout can affect any adult with ADHD. High-achieving ADHD adults — those whose intelligence, drive, and compensatory capacity have allowed them to maintain functioning at high levels for extended periods — are specifically vulnerable for reasons worth understanding clearly.</p>
+
+<h3>The masking cost accumulates invisibly</h3>
+
+<p>The effort of maintaining a neurotypical-appearing performance — the social monitoring, the impulse suppression, the attention management, the working memory compensation — has a real neurological cost that is essentially invisible to anyone observing the performance. The performance looks effortless. The effort behind it is anything but.</p>
+
+<p>Because the cost is invisible, it is rarely accounted for in workload assessment, self-management planning, or the expectations of employers, partners, or the person themselves. The high-achieving ADHD adult who appears to be managing well is also, simultaneously, spending enormous neurological resources on the management of appearing to manage well.</p>
+
+<p>This cost is added to the already elevated cognitive load of compensating for executive dysfunction, without being recognized or offset.</p>
+
+<p>Over time, this invisible cost accumulates. There is no mechanism for drawing it down to a sustainable level when the person doing the spending doesn't know how much they're spending, and neither does anyone else.</p>
+
+<h3>The high floor creates a burnout pressure cooker</h3>
+
+<p>High-achieving ADHD adults have often set — or been assigned — a high performance floor: a baseline expectation of output and functioning that reflects their demonstrated capacity at its best. The expectation, once established, applies continuously rather than only during the high-activation periods that produced it.</p>
+
+<p>The pressure to maintain the high floor across variable activation states — to produce at peak-week levels during low-activation weeks, to perform at the same level regardless of sleep, stress, or neurological state — requires the kind of sustained effortful compensation that is precisely what produces burnout.</p>
+
+<p>The high floor that demonstrates genuine capability also creates the conditions for the most dramatic burnout: the further the performance baseline is from the ADHD brain's natural, unsupported floor, the more effort is required to maintain it, and the greater the collapse when that effort is no longer available.</p>
+
+<h3>Late diagnosis means longer accumulation</h3>
+
+<p>For ADHD adults who are diagnosed late — in their thirties, forties, or beyond — the burnout arrives after a longer accumulation period than for those diagnosed and supported earlier.</p>
+
+<p>Decades of unrecognized compensation, without the structural supports that accurate understanding and effective treatment provide, produces a particularly deep depletion. The burnout may be the first unmistakable symptom that something has been wrong for a very long time.</p>
+
+<h3>The inability to ask for help that is relevant</h3>
+
+<p>Asking for help with the specific things that are most depleting requires being able to name them — which requires having a framework for understanding what is happening.</p>
+
+<p>High-achieving ADHD adults who don't have the diagnosis, or who have it but haven't connected it to the specific mechanisms of their depletion, cannot effectively request the support that would help. They may ask for general support that doesn't address the actual problem, or they may not ask at all, because nothing in their framework explains why someone with their apparent capacity would need help with what they need help with.</p>
+
+<h2>The Warning Signs</h2>
+
+<p>ADHD burnout typically has a prodrome — a period of warning signs that precede the collapse. Recognizing these signs, and taking them seriously rather than pushing through them, is significantly more productive than reaching the full burnout state and then attempting recovery.</p>
+
+<p>Common warning signs include:</p>
+
+<h3>Increasing reliance on urgency for all functioning</h3>
+
+<p>When the urgency-based activation that normally operates alongside other activation mechanisms becomes the only mechanism that works at all — when tasks are only ever getting done in the final crisis window, and the mechanisms that previously provided early-stage activation have stopped functioning — the compensatory system is showing its overload.</p>
+
+<h3>Systems that were working beginning to fail</h3>
+
+<p>The calendar that was being maintained stops being checked. The capture system that was being used stops being used. The weekly reset that was happening stops happening.</p>
+
+<p>Each of these system failures represents the depletion of the executive function maintenance that was keeping them running — and each failed system increases the disorder and demand that further depletes the available resource.</p>
+
+<h3>Emotional dysregulation becoming more frequent and more intense</h3>
+
+<p>As executive function reserves deplete, emotional regulation — which shares the same prefrontal regulatory substrate — degrades.</p>
+
+<p>Emotional responses that were previously managed become less manageable. Frustration arrives faster and at higher intensity. The recovery time from emotional activation lengthens. The gap between stimulus and response narrows to the point where the pause protocols that normally work become inaccessible.</p>
+
+<h3>Physical symptoms</h3>
+
+<p>Sleep disruption worsening beyond the ADHD baseline. Fatigue that doesn't resolve with sleep. Headaches, muscle tension, gastrointestinal symptoms, and other physical manifestations of chronic stress activation.</p>
+
+<p>The body's stress response has been running at elevated levels for extended periods, and its symptoms are becoming impossible to ignore.</p>
+
+<h3>Social withdrawal and reduced communication</h3>
+
+<p>Reducing social contact, letting messages accumulate without response, canceling plans with increasing frequency, declining invitations, and withdrawing from relationships that require energy — these are both symptoms of the depletion and responses to it.</p>
+
+<p>The social performance that masking requires is one of the first capacities to deplete, and the withdrawal is the nervous system's attempt to remove a major source of demand.</p>
+
+<h3>The inability to access previously reliable strengths</h3>
+
+<p>When the specific capabilities that have been most central to functioning — the verbal fluency, the crisis performance, the creative output, the rapid learning — become inaccessible, this is a significant warning sign.</p>
+
+<p>These are typically the last strengths to be affected by ordinary fatigue. Their loss signals a depth of depletion that goes beyond tiredness.</p>
+
+<h3>Anhedonia in previously meaningful activities</h3>
+
+<p>When activities that were genuinely engaging — creative work, professional challenges, relationships, hobbies — no longer produce the activation or pleasure they previously did, the neurological reward system is showing the effects of sustained depletion.</p>
+
+<p>This is among the most alarming signs because it removes the very mechanisms — genuine interest, personal meaning — that would otherwise support recovery motivation.</p>
+
+<h2>The Recovery Process</h2>
+
+<p>Recovery from ADHD burnout is not a single intervention. It is a process — typically longer than the person hopes and shorter than they fear — that requires specific components in roughly sequential order.</p>
+
+<h3>Stage 1: Stop the Bleeding</h3>
+
+<p>The first requirement of burnout recovery is the reduction of ongoing demand to the level that the depleted system can actually sustain — not the level that was being sustained before the collapse, which was clearly unsustainable, but the minimum viable functioning level that allows partial recovery to begin.</p>
+
+<p>This is often the hardest stage because it requires things that feel like failure: postponing commitments, reducing professional output, withdrawing from social obligations, and in some cases taking a formal leave of absence or significantly restructuring work demands. These actions conflict with the high-achiever identity, the performance standard, and the shame about needing accommodation that many high-IQ ADHD adults carry.</p>
+
+<p>They are nevertheless necessary. Attempting to recover while maintaining the demand level that produced the burnout is equivalent to trying to heal a broken bone while continuing to walk on it. The intention is good. The physiology doesn't permit it.</p>
+
+<p>Practical actions in Stage 1:</p>
+
 <ul>
   <li>Identify and reduce the most depleting demands — specifically the ones that require the most sustained masking, the most executive compensation, and the most sustained performance of neurotypical competence</li>
   <li>Communicate with relevant people — employers, partners, close friends — at the level of transparency that is both honest and safe, about a need to reduce demand temporarily</li>
   <li>Remove optional obligations without guilt — this is a medical necessity framed as personal failure by the shame that accompanies it; the framing is wrong</li>
   <li>Create physical conditions for minimal-demand rest: sleep prioritized, schedule simplified, environment reduced in stimulation and demand</li>
 </ul>
-<p>Stage 2: Genuine Rest Rest in the ADHD burnout context is not the absence of work. It is the presence of activities that restore neurological resources rather than depleting them — activities that do not require executive function, sustained attention, social performance, or the suppression of ADHD symptoms. For many high-achieving ADHD adults, genuine rest is both unfamiliar and uncomfortable. The culture of productivity, internalized over years, converts rest into guilt. The ADHD brain, in low-demand conditions, may not settle easily into restoration — its novelty-seeking system may generate restlessness and the pull toward stimulation that feels like rest but isn't. Identifying what actually restores is individual and requires honest experimentation. Common genuine restorative activities for ADHD adults include: Physical movement in natural environments. Walking, hiking, swimming, cycling — particularly in natural rather than urban settings. The combination of mild physical activity and environmental novelty (natural environments are continuously, low-level varied) appears to provide neurological restoration that sedentary indoor rest does not. Research on attention restoration theory, developed by Rachel and Stephen Kaplan, suggests that natural environments specifically replenish directed attention capacity — the resource that ADHD most directly impairs.</p>
-<p>Low-demand, personally meaningful activity. Cooking a meal without time pressure. Listening to music without other obligations. Reading for pleasure without any expectation of retention or application. Working with hands in ways that are satisfying but not challenging. These activities engage without demanding, which is the specific combination that allows the executive function system to rest without producing the boredom and restlessness that complete inactivity generates in ADHD brains. Genuine social connection with safe people. The social withdrawal of burnout is real and protective, and should be honored. But total social isolation is not restorative — humans are social animals, and connection with people who feel safe — who do not require performance, who accept the depleted version without concern, who provide warmth without demand — is itself restorative. The distinction is between social performance — exhausting — and social belonging — replenishing. Sleep, sleep, and sleep. Sleep is both the most important recovery resource and the most reliably disrupted feature of ADHD. During recovery, addressing sleep specifically — through sleep hygiene, addressing circadian rhythm disruption with professional support where needed, medication adjustments if sleep-disrupting stimulant timing is a factor — is not optional. The neurological restoration that other recovery activities support requires sleep to actually occur. Stage 3: Stabilization and Rebuilding Once the acute depletion has been partially addressed — typically over several weeks to a few months, depending on the depth of the burnout — a gradual return to function becomes possible. This stage involves rebuilding the basic structural supports that support daily functioning without immediately returning to the demand level that produced the collapse. The characteristic error of this stage is resuming too quickly at too high a level. The partial return of capacity feels like full recovery. The person, motivated by relief and by the accumulated backlog of neglected obligations, returns to their previous demand level before the recovery is complete. The result is a relapse — sometimes faster and deeper than the initial collapse, because the recovery was incomplete. Rebuilding in Stage 3 requires: Re-establishing basic structural systems before resuming high demand. The daily reset. The capture system. The sleep schedule. The exercise habit. These are the infrastructure of functioning for ADHD adults, and their re-establishment before the demand increases is what makes the returning demand manageable rather than immediately overwhelming. Starting with the simplest versions — minimum viable systems, single habits rather than complete overhauls — and building incrementally is more durable than attempting to rebuild</p>
-<p>everything at once. The complete, comprehensive system rebuild is an activation-trap in the burnout recovery context: it is interesting to design, immediately demands more than the recovering system can sustain, and collapses into another system-failure experience that adds shame to the recovery process. Returning to treatment and professional support. Burnout is one of the clearest indicators that the current treatment configuration — medication, therapy, coaching — is insufficient for the demands being faced. The recovery period is the appropriate time to reassess treatment: Is the medication addressing the specific impairments that are most costly? Is there a therapist familiar with ADHD? Is coaching available? Are workplace accommodations in place? Attempting burnout recovery without these supports is more difficult than it needs to be. Professional support does not represent weakness. In the context of a neurological condition whose management has been chronically under-supported, it represents the appropriate application of available resources. Processing the emotional content of the burnout. The burnout itself — the experience of collapse, of systems failing, of the compensation machinery running out — is often emotionally significant in ways that require processing rather than simply moving past. There may be grief: about the years of unsupported effort, about the things that fell apart, about the version of the person that the burnout revealed as unsustainable. There may be anger: at systems that didn't recognize and support the need, at a culture that treated compensation as the expectation rather than the exception. There may be relief: at having stopped, at the permission that the collapse created to need what was always needed. These feelings are all legitimate. Therapy, journaling, and trusted relationships are all appropriate channels for this processing. Bypassing it in the rush to return to functioning tends to leave it unprocessed in a way that resurfaces during the next period of stress. Stage 4: Structural Reassessment The most important long-term outcome of a burnout episode — more important even than the recovery itself — is the structural change it indicates is necessary. Burnout is not random. It is the predictable result of specific conditions: demands that exceed compensatory capacity, supports that are insufficient for the profile, environments that require sustained unsupported masking, and standards that are incompatible with the ADHD operating system without adequate accommodation. Recovering from burnout without changing the conditions that produced it is recovering in order to burn out again. This is not a hypothetical risk. It is the documented pattern of burnout recurrence in populations that return to unchanged circumstances after recovery.</p>
-<h2>Structural reassessment asks:</h2>
-<p>What were the specific conditions that produced this burnout? Not the general sense of having been overwhelmed, but the specific demands, environments, relationships, and expectation structures that were most costly. Which of those conditions can be changed? Some demands are non-negotiable. Many are not. The willingness to examine which is which — honestly, without the reflex of treating all existing demands as fixed — is necessary for genuine structural change. What supports were absent that would have made a material difference? Medication that was not in place, or not optimally calibrated? Therapy? Coaching? Workplace accommodations? The identification of the specific missing supports, and the deliberate addition of them during the recovery period, converts the burnout episode into the occasion for the structural improvement that was overdue. What were the warning signs that were ignored or missed? Most burnouts have a long prodrome of warning signs that were not recognized as such, were recognized and dismissed, or were recognized and acted on with insufficient change. Identifying the specific signs that preceded this burnout creates the early warning system for the next one. What is the non-negotiable minimum that this nervous system requires to function sustainably? Not the minimum it can survive on — the ADHD nervous system has often demonstrated remarkable capacity for survival under inadequate conditions. The minimum for sustainable, dignified functioning: adequate sleep, regular treatment, manageable demand, some proportion of genuinely activating work, relationships that include authentic rather than performed connection. This minimum is not self-indulgence. It is the operating specification of a specific neurological system — the conditions under which it functions as it actually can, rather than the conditions under which it merely endures. Preventing the Next Burnout Complete prevention of burnout is not a realistic goal for most high-IQ ADHD adults, given the chronic nature of the condition and the persistent misalignment between the ADHD operating system and most institutional environments. What is realistic is extending the sustainable period between burnout episodes — and reducing their severity when they occur — through the specific practices that reduce the cumulative depletion that precedes them.</p>
-<p>Regular depletion monitoring</p>
-<p>Building a simple, regular self-assessment of current functioning level — weekly or bi-weekly, brief, honest — creates an ongoing data stream about the state of the compensatory reserve. The assessment doesn't need to be elaborate: a simple rating of current executive function, emotional regulation, sleep quality, and overall depletion across several dimensions, noted consistently, reveals trends that single-point assessments miss. Trends toward depletion — observable across several weeks of increasing demand, reduced sleep, worsening emotional regulation — are far more actionable at the early stage than at the burnout stage. The intervention needed to address early depletion is small. The intervention needed to address full burnout is large. Early detection is its own most important prevention. Non-negotiable maintenance practices Certain practices have a disproportionate effect on the sustainable functioning of the ADHD nervous system: adequate sleep, regular aerobic exercise, consistent medication compliance, and some minimum of low-demand genuine rest. These are not lifestyle preferences. They are maintenance requirements of a specific neurological system. Treating them as non-negotiable — as prior commitments that hold even when demand increases, rather than as optional activities that yield to schedule pressure — is the single most important structural decision available for burnout prevention. The temptation to sacrifice sleep, exercise, and rest during high-demand periods is strong and intuitively reasonable: the demand is real, the time is limited, and these activities feel secondary to the work. The effect is the opposite: sacrificing maintenance during high-demand periods reduces the capacity that high demand requires, accelerating the depletion that produces burnout. Masking budget management For high-IQ ADHD adults who mask extensively in professional and social contexts, deliberately managing the total masking load — the proportion of each day that requires sustained performance of neurotypical competence — is a form of energy management with direct burnout prevention value. This means: building periods of genuine non-performance into each day, not as recovery after the fact but as a scheduled feature of the day that reduces the total depletion. Time alone. Time in low-demand natural environments. Time with people in whose presence masking is not required. Time doing activities that engage without demanding performance. The masking budget cannot usually be reduced to zero — most professional and many social contexts require some degree of performance management. But it can be managed: the proportion of each day that requires full masking performance can be monitored, and the non-masking periods protected as deliberately as the productive work windows.</p>
-<h2>Regular treatment review</h2>
-<p>Treatment for ADHD is not a set-and-forget intervention. It requires periodic reassessment as life demands, stress levels, hormonal factors, and neurological state change. Medication that was optimal six months ago may need adjustment. Therapy goals that were relevant a year ago may have been addressed and replaced by new ones. Coaching strategies that worked in a previous role or life structure may need revision for current circumstances. A regular — at minimum annual, ideally more frequent — review of treatment effectiveness, with the prescribing clinician and therapist, is a maintenance practice with direct burnout prevention value. It converts treatment from a passive background support into an active, responsive element of the functioning infrastructure. Building rest into success One of the most consistent patterns in high-achieving ADHD burnout is the paradox of success as a burnout trigger: a period of high output, recognized achievement, or successfully delivered project is followed not by recovery but by an immediate escalation of demand — either externally, because success generates new expectations, or internally, because the achievement baseline has moved upward. Deliberately building a recovery period after each major output — a reduced-demand week after a major project delivery, a genuine break after a high-intensity period, a scheduled lighter period after a successful heavy one — converts the aftermath of success into a recovery resource rather than an occasion for immediately higher demand. This requires treating rest after success as legitimate rather than lazy — as a strategic investment in the sustainable capacity for the next period of high output, rather than as an indulgence that should be quickly overcome in favor of capitalizing on momentum. The momentum argument is intuitively compelling. It is also, for ADHD burnout prevention, frequently wrong. The brain that has just produced at its ceiling needs recovery before it can produce at its ceiling again. Ignoring that need in favor of momentum converts the success into the setup for the collapse. Rebuilding Trust With Yourself One of the least discussed and most significant consequences of burnout — particularly for high-achieving ADHD adults who have organized significant portions of their identity around their capability — is the damage it does to self-trust.</p>
-<p>The burnout represents, at an emotional level, a failure of the self-management system that the person has been running and depending on. The strategies that worked stopped working. The capacity that was relied on proved unreliable. The performance that was maintained could not be maintained. For a person who has spent years proving to themselves and others that they can manage — that the ADHD is handled, that the compensation is effective, that the functioning is adequate — the burnout can feel like a fundamental exposure: proof, finally, of the inadequacy that the shame narrative always claimed was there. This feeling is understandable. It is also wrong. The burnout is not proof of inadequacy. It is proof of the limits of any system running without adequate support at sustained above-capacity demand. Any system — neurotypical or neurodivergent, highly capable or otherwise — will break under those conditions. The high-achieving ADHD adult did not fail to maintain something that should have been maintainable. They maintained, for a remarkable period, something that required far more support than was available. Rebuilding self-trust after burnout requires a genuinely revised relationship with the concept of capacity — one that is honest about what this specific neurological system can sustain with adequate support, rather than the aspirational standard of what it could sustain at its maximum, temporarily, when running on reserve. Realistic self-trust is more durable than the trust in a performance that could only ever be sustained on credit. It also requires the accumulation of new evidence — small, consistent, structurally supported experiences of following through, maintaining systems, meeting commitments at a manageable level — that builds a different data set about reliability than the burnout history provides. Not at the previous demand level, which produced the burnout. At the sustainable level, which is different — smaller in some respects, more durable in all of them. The sustainable version of this brain — with adequate support, appropriate demand, genuine rest, and honest structural accommodation — is capable of more than the unsupported version running on compensation and adrenaline. Not because the sustainable version is trying harder. Because it is finally operating in the conditions that allow its actual capacity to show up, reliably, over time. That is the version that was always possible. It is also, for many high-achieving ADHD adults, the version they have never fully inhabited. Recovery is the opportunity to begin.</p>
+
+<h3>Stage 2: Genuine Rest</h3>
+
+<p>Rest in the ADHD burnout context is not the absence of work. It is the presence of activities that restore neurological resources rather than depleting them — activities that do not require executive function, sustained attention, social performance, or the suppression of ADHD symptoms.</p>
+
+<p>For many high-achieving ADHD adults, genuine rest is both unfamiliar and uncomfortable. The culture of productivity, internalized over years, converts rest into guilt. The ADHD brain, in low-demand conditions, may not settle easily into restoration — its novelty-seeking system may generate restlessness and the pull toward stimulation that feels like rest but isn't.</p>
+
+<p>Identifying what actually restores is individual and requires honest experimentation. Common genuine restorative activities for ADHD adults include:</p>
+
+<p><strong>Physical movement in natural environments.</strong> Walking, hiking, swimming, cycling — particularly in natural rather than urban settings. The combination of mild physical activity and environmental novelty (natural environments are continuously, low-level varied) appears to provide neurological restoration that sedentary indoor rest does not. Research on attention restoration theory, developed by Rachel and Stephen Kaplan, suggests that natural environments specifically replenish directed attention capacity — the resource that ADHD most directly impairs.</p>
+
+<p><strong>Low-demand, personally meaningful activity.</strong> Cooking a meal without time pressure. Listening to music without other obligations. Reading for pleasure without any expectation of retention or application. Working with hands in ways that are satisfying but not challenging. These activities engage without demanding, which is the specific combination that allows the executive function system to rest without producing the boredom and restlessness that complete inactivity generates in ADHD brains.</p>
+
+<p><strong>Genuine social connection with safe people.</strong> The social withdrawal of burnout is real and protective, and should be honored. But total social isolation is not restorative — humans are social animals, and connection with people who feel safe — who do not require performance, who accept the depleted version without concern, who provide warmth without demand — is itself restorative. The distinction is between social performance — exhausting — and social belonging — replenishing.</p>
+
+<p><strong>Sleep, sleep, and sleep.</strong> Sleep is both the most important recovery resource and the most reliably disrupted feature of ADHD. During recovery, addressing sleep specifically — through sleep hygiene, addressing circadian rhythm disruption with professional support where needed, medication adjustments if sleep-disrupting stimulant timing is a factor — is not optional. The neurological restoration that other recovery activities support requires sleep to actually occur.</p>
+
+<h3>Stage 3: Stabilization and Rebuilding</h3>
+
+<p>Once the acute depletion has been partially addressed — typically over several weeks to a few months, depending on the depth of the burnout — a gradual return to function becomes possible. This stage involves rebuilding the basic structural supports that support daily functioning without immediately returning to the demand level that produced the collapse.</p>
+
+<p>The characteristic error of this stage is resuming too quickly at too high a level. The partial return of capacity feels like full recovery. The person, motivated by relief and by the accumulated backlog of neglected obligations, returns to their previous demand level before the recovery is complete. The result is a relapse — sometimes faster and deeper than the initial collapse, because the recovery was incomplete.</p>
+
+<p>Rebuilding in Stage 3 requires:</p>
+
+<p><strong>Re-establishing basic structural systems before resuming high demand.</strong> The daily reset. The capture system. The sleep schedule. The exercise habit. These are the infrastructure of functioning for ADHD adults, and their re-establishment before the demand increases is what makes the returning demand manageable rather than immediately overwhelming.</p>
+
+<p>Starting with the simplest versions — minimum viable systems, single habits rather than complete overhauls — and building incrementally is more durable than attempting to rebuild everything at once. The complete, comprehensive system rebuild is an activation-trap in the burnout recovery context: it is interesting to design, immediately demands more than the recovering system can sustain, and collapses into another system-failure experience that adds shame to the recovery process.</p>
+
+<p><strong>Returning to treatment and professional support.</strong> Burnout is one of the clearest indicators that the current treatment configuration — medication, therapy, coaching — is insufficient for the demands being faced. The recovery period is the appropriate time to reassess treatment: Is the medication addressing the specific impairments that are most costly? Is there a therapist familiar with ADHD? Is coaching available? Are workplace accommodations in place? Attempting burnout recovery without these supports is more difficult than it needs to be.</p>
+
+<p>Professional support does not represent weakness. In the context of a neurological condition whose management has been chronically under-supported, it represents the appropriate application of available resources.</p>
+
+<p><strong>Processing the emotional content of the burnout.</strong> The burnout itself — the experience of collapse, of systems failing, of the compensation machinery running out — is often emotionally significant in ways that require processing rather than simply moving past.</p>
+
+<p>There may be grief: about the years of unsupported effort, about the things that fell apart, about the version of the person that the burnout revealed as unsustainable. There may be anger: at systems that didn't recognize and support the need, at a culture that treated compensation as the expectation rather than the exception. There may be relief: at having stopped, at the permission that the collapse created to need what was always needed.</p>
+
+<p>These feelings are all legitimate. Therapy, journaling, and trusted relationships are all appropriate channels for this processing. Bypassing it in the rush to return to functioning tends to leave it unprocessed in a way that resurfaces during the next period of stress.</p>
+
+<h3>Stage 4: Structural Reassessment</h3>
+
+<p>The most important long-term outcome of a burnout episode — more important even than the recovery itself — is the structural change it indicates is necessary.</p>
+
+<p>Burnout is not random. It is the predictable result of specific conditions: demands that exceed compensatory capacity, supports that are insufficient for the profile, environments that require sustained unsupported masking, and standards that are incompatible with the ADHD operating system without adequate accommodation.</p>
+
+<p>Recovering from burnout without changing the conditions that produced it is recovering in order to burn out again. This is not a hypothetical risk. It is the documented pattern of burnout recurrence in populations that return to unchanged circumstances after recovery.</p>
+
+<p>Structural reassessment asks:</p>
+
+<p>What were the specific conditions that produced this burnout? Not the general sense of having been overwhelmed, but the specific demands, environments, relationships, and expectation structures that were most costly.</p>
+
+<p>Which of those conditions can be changed? Some demands are non-negotiable. Many are not. The willingness to examine which is which — honestly, without the reflex of treating all existing demands as fixed — is necessary for genuine structural change.</p>
+
+<p>What supports were absent that would have made a material difference? Medication that was not in place, or not optimally calibrated? Therapy? Coaching? Workplace accommodations? The identification of the specific missing supports, and the deliberate addition of them during the recovery period, converts the burnout episode into the occasion for the structural improvement that was overdue.</p>
+
+<p>What were the warning signs that were ignored or missed? Most burnouts have a long prodrome of warning signs that were not recognized as such, were recognized and dismissed, or were recognized and acted on with insufficient change. Identifying the specific signs that preceded this burnout creates the early warning system for the next one.</p>
+
+<p>What is the non-negotiable minimum that this nervous system requires to function sustainably? Not the minimum it can survive on — the ADHD nervous system has often demonstrated remarkable capacity for survival under inadequate conditions. The minimum for sustainable, dignified functioning: adequate sleep, regular treatment, manageable demand, some proportion of genuinely activating work, relationships that include authentic rather than performed connection.</p>
+
+<p>This minimum is not self-indulgence. It is the operating specification of a specific neurological system — the conditions under which it functions as it actually can, rather than the conditions under which it merely endures.</p>
+
+<h2>Preventing the Next Burnout</h2>
+
+<p>Complete prevention of burnout is not a realistic goal for most high-IQ ADHD adults, given the chronic nature of the condition and the persistent misalignment between the ADHD operating system and most institutional environments.</p>
+
+<p>What is realistic is extending the sustainable period between burnout episodes — and reducing their severity when they occur — through the specific practices that reduce the cumulative depletion that precedes them.</p>
+
+<h3>Regular depletion monitoring</h3>
+
+<p>Building a simple, regular self-assessment of current functioning level — weekly or bi-weekly, brief, honest — creates an ongoing data stream about the state of the compensatory reserve. The assessment doesn't need to be elaborate: a simple rating of current executive function, emotional regulation, sleep quality, and overall depletion across several dimensions, noted consistently, reveals trends that single-point assessments miss.</p>
+
+<p>Trends toward depletion — observable across several weeks of increasing demand, reduced sleep, worsening emotional regulation — are far more actionable at the early stage than at the burnout stage.</p>
+
+<p>The intervention needed to address early depletion is small. The intervention needed to address full burnout is large. Early detection is its own most important prevention.</p>
+
+<h3>Non-negotiable maintenance practices</h3>
+
+<p>Certain practices have a disproportionate effect on the sustainable functioning of the ADHD nervous system: adequate sleep, regular aerobic exercise, consistent medication compliance, and some minimum of low-demand genuine rest. These are not lifestyle preferences. They are maintenance requirements of a specific neurological system.</p>
+
+<p>Treating them as non-negotiable — as prior commitments that hold even when demand increases, rather than as optional activities that yield to schedule pressure — is the single most important structural decision available for burnout prevention.</p>
+
+<p>The temptation to sacrifice sleep, exercise, and rest during high-demand periods is strong and intuitively reasonable: the demand is real, the time is limited, and these activities feel secondary to the work.</p>
+
+<p>The effect is the opposite: sacrificing maintenance during high-demand periods reduces the capacity that high demand requires, accelerating the depletion that produces burnout.</p>
+
+<h3>Masking budget management</h3>
+
+<p>For high-IQ ADHD adults who mask extensively in professional and social contexts, deliberately managing the total masking load — the proportion of each day that requires sustained performance of neurotypical competence — is a form of energy management with direct burnout prevention value.</p>
+
+<p>This means: building periods of genuine non-performance into each day, not as recovery after the fact but as a scheduled feature of the day that reduces the total depletion. Time alone. Time in low-demand natural environments. Time with people in whose presence masking is not required. Time doing activities that engage without demanding performance.</p>
+
+<p>The masking budget cannot usually be reduced to zero — most professional and many social contexts require some degree of performance management. But it can be managed: the proportion of each day that requires full masking performance can be monitored, and the non-masking periods protected as deliberately as the productive work windows.</p>
+
+<h3>Regular treatment review</h3>
+
+<p>Treatment for ADHD is not a set-and-forget intervention. It requires periodic reassessment as life demands, stress levels, hormonal factors, and neurological state change. Medication that was optimal six months ago may need adjustment. Therapy goals that were relevant a year ago may have been addressed and replaced by new ones. Coaching strategies that worked in a previous role or life structure may need revision for current circumstances.</p>
+
+<p>A regular — at minimum annual, ideally more frequent — review of treatment effectiveness, with the prescribing clinician and therapist, is a maintenance practice with direct burnout prevention value. It converts treatment from a passive background support into an active, responsive element of the functioning infrastructure.</p>
+
+<h3>Building rest into success</h3>
+
+<p>One of the most consistent patterns in high-achieving ADHD burnout is the paradox of success as a burnout trigger: a period of high output, recognized achievement, or successfully delivered project is followed not by recovery but by an immediate escalation of demand — either externally, because success generates new expectations, or internally, because the achievement baseline has moved upward.</p>
+
+<p>Deliberately building a recovery period after each major output — a reduced-demand week after a major project delivery, a genuine break after a high-intensity period, a scheduled lighter period after a successful heavy one — converts the aftermath of success into a recovery resource rather than an occasion for immediately higher demand.</p>
+
+<p>This requires treating rest after success as legitimate rather than lazy — as a strategic investment in the sustainable capacity for the next period of high output, rather than as an indulgence that should be quickly overcome in favor of capitalizing on momentum.</p>
+
+<p>The momentum argument is intuitively compelling. It is also, for ADHD burnout prevention, frequently wrong. The brain that has just produced at its ceiling needs recovery before it can produce at its ceiling again. Ignoring that need in favor of momentum converts the success into the setup for the collapse.</p>
+
+<h2>Rebuilding Trust With Yourself</h2>
+
+<p>One of the least discussed and most significant consequences of burnout — particularly for high-achieving ADHD adults who have organized significant portions of their identity around their capability — is the damage it does to self-trust.</p>
+
+<p>The burnout represents, at an emotional level, a failure of the self-management system that the person has been running and depending on. The strategies that worked stopped working. The capacity that was relied on proved unreliable. The performance that was maintained could not be maintained.</p>
+
+<p>For a person who has spent years proving to themselves and others that they can manage — that the ADHD is handled, that the compensation is effective, that the functioning is adequate — the burnout can feel like a fundamental exposure: proof, finally, of the inadequacy that the shame narrative always claimed was there.</p>
+
+<p>This feeling is understandable. It is also wrong. The burnout is not proof of inadequacy. It is proof of the limits of any system running without adequate support at sustained above-capacity demand. Any system — neurotypical or neurodivergent, highly capable or otherwise — will break under those conditions.</p>
+
+<p>The high-achieving ADHD adult did not fail to maintain something that should have been maintainable. They maintained, for a remarkable period, something that required far more support than was available.</p>
+
+<p>Rebuilding self-trust after burnout requires a genuinely revised relationship with the concept of capacity — one that is honest about what this specific neurological system can sustain with adequate support, rather than the aspirational standard of what it could sustain at its maximum, temporarily, when running on reserve. Realistic self-trust is more durable than the trust in a performance that could only ever be sustained on credit.</p>
+
+<p>It also requires the accumulation of new evidence — small, consistent, structurally supported experiences of following through, maintaining systems, meeting commitments at a manageable level — that builds a different data set about reliability than the burnout history provides. Not at the previous demand level, which produced the burnout. At the sustainable level, which is different — smaller in some respects, more durable in all of them.</p>
+
+<p>The sustainable version of this brain — with adequate support, appropriate demand, genuine rest, and honest structural accommodation — is capable of more than the unsupported version running on compensation and adrenaline. Not because the sustainable version is trying harder. Because it is finally operating in the conditions that allow its actual capacity to show up, reliably, over time.</p>
+
+<p>That is the version that was always possible. It is also, for many high-achieving ADHD adults, the version they have never fully inhabited. Recovery is the opportunity to begin.</p>
       </div>
 
       <nav class="chapter-nav" aria-label="Chapter navigation">

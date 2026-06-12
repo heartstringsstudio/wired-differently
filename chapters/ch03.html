@@ -3,6 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script>
+    /* Apply saved theme + font size before first paint to prevent FOUC */
+    (function () {
+      try {
+        var d = document.documentElement, s = localStorage;
+        var t = s.getItem('wired_darkMode');
+        var dark = t !== null ? JSON.parse(t)
+                              : matchMedia('(prefers-color-scheme: dark)').matches;
+        d.setAttribute('data-theme', dark ? 'dark' : 'light');
+        var f = s.getItem('wired_fontSize');
+        if (f) d.setAttribute('data-font-size', JSON.parse(f));
+      } catch (e) {}
+    })();
+  </script>
+
   <meta name="description" content="Chapter 3: What High IQ + ADHD Actually Means — Wired Differently" />
   <meta name="theme-color" content="#2D6A6A" />
   <title>Ch. 3: What High IQ + ADHD Actually Means — Wired Differently</title>
@@ -10,8 +26,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="../icons/icon-180.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="../icons/icon-32.png" />
   <link rel="stylesheet" href="../css/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" href="../fonts/lora-var.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 <body data-ch-id="ch03" data-ch-num="3">
 
@@ -44,35 +59,158 @@
 
       <header class="chapter-header fade-in">
         <p class="chapter-header__part">Part One &nbsp;·&nbsp; Understanding the Profile</p>
-        <p class="chapter-header__number">Chapter 3</p>
+        <p class="chapter-header__number">Chapter 3 <span class="chapter-header__of">of 27</span></p>
         <h1 class="chapter-header__title" id="chapter-title">What High IQ + ADHD Actually Means</h1>
         <p class="chapter-header__subtitle">Intelligence Doesn't Cancel ADHD. It Disguises It.</p>
       </header>
 
       <div class="prose fade-in fade-in-delay-1" id="chapter-content">
-<p>There is a belief — held by teachers, doctors, employers, family members, and often by the people living it — that goes something like this: If you're smart enough, you can figure out how to compensate. If you're really smart, ADHD shouldn't be a real problem. This belief causes enormous damage. It delays diagnosis, sometimes by decades. It produces adults who have spent their lives being told they're not living up to their potential, without anyone — including themselves — understanding why. It generates a specific flavor of shame that is hard to dislodge: the shame of someone who knows they are capable, watches themselves repeatedly fail to perform at that capacity, and cannot explain the gap. The reality is this: high intelligence and ADHD are independent variables. One does not cancel the other. A person can have an IQ of 140 and still have genuine, impairing executive dysfunction. The ADHD doesn't disappear because of the IQ. It hides — from the outside world, and often from the person themselves. Understanding how that hiding works is one of the most practically useful things this manual can offer. What Intelligence Actually Does in This Context When a high-IQ person has ADHD, their cognitive ability becomes a double-edged tool. On one edge: it genuinely helps. Strong verbal ability allows them to talk through problems, advocate for themselves, and mask confusion effectively. Strong long-term memory compensates for working memory gaps. Pattern recognition lets them pick up new material faster, sometimes covering gaps left by inattention. Rapid processing allows them to skim, synthesize, and approximate their way to correct answers even when they didn't follow the full process. In many academic and professional settings, these abilities buy time — sometimes years, sometimes decades. On the other edge: the compensation is costly, exhausting, and eventually insufficient. And because it works well enough for long enough, it often prevents the person from ever getting the understanding and support they need.</p>
-<p>The intelligence doesn't fix the ADHD. It finances it — on credit — until the debt comes due. The Masking Mechanism Masking, in this context, refers to the conscious or unconscious use of skills, strategies, social performance, and sheer effort to hide the symptoms and impairments of ADHD from others — and sometimes from oneself. High-IQ individuals with ADHD tend to be skilled, often involuntary, maskers. The mechanisms include: Verbal compensation Strong verbal ability allows for smooth recovery when focus lapses. If attention drifts in a meeting, a high-IQ person can often reconstruct context from the last thing they caught, ask a well-framed question that sounds engaged, or use humor to redirect. Observers see an articulate, engaged person. The person themselves experienced a significant portion of the interaction from behind a fog. Last-minute performance Urgency is one of the few reliable activators of the ADHD motivational system. High-IQ individuals with ADHD often produce genuinely excellent work under extreme time pressure — work that accurately reflects their ability. This becomes, in many cases, their primary evidence against their own ADHD: &quot;I can't have ADHD, I got an A on that paper.&quot; What goes unexamined is what it took to produce it, how many nights of sleep it cost, and how many other things fell apart while that paper consumed the last 36 hours. Interest-driven performance When a subject engages a high-IQ ADHD brain deeply, the results can look exceptional. Hyperfocus plus high cognitive ability is a potent combination. The person produces work that seems effortless and extraordinary. But this creates a misleading data point: the performance ceiling in an area of deep interest says nothing about the consistent floor. The person who writes brilliant, insightful essays on topics they love may genuinely be unable to complete basic administrative tasks — not as a choice, but as a neurological reality. Social intelligence Many high-IQ individuals with ADHD develop strong social radar — partly as a survival mechanism. Reading the room well, tracking social signals, knowing when something seems off — these skills allow for fluid social performance even when internally the person is scattered. Conversations may look smooth from the outside while the person inside is</p>
-<p>working hard to track the thread, suppress the impulse to interrupt, and manage the feeling that the interaction is moving either too slowly or too fast. Accumulated workarounds Over years, high-IQ ADHD adults build elaborate, often invisible systems of workarounds. They always arrive early to buffer against time blindness. They repeat information back to themselves immediately after receiving it. They keep notes in every pocket. They engineer their lives to minimize exposure to their weakest areas. These systems work — until they stop, or until life complexity outpaces them. But while they're working, they make the ADHD nearly invisible. The Hidden Cost of Compensation Here is something that rarely gets said clearly enough: Compensation is not the same as not having the condition. When a person with a broken leg uses a crutch skillfully, we don't say the leg isn't broken. We say the crutch is working. The effort of using the crutch, the fatigue it produces, the way it changes how the person moves through the world — all of that is real, even if the person appears to be walking. High-IQ ADHD adults who have spent years compensating are often exhausted in a way that's difficult to articulate. They frequently describe:</p>
+
+<p>There is a belief — held by teachers, doctors, employers, family members, and often by the people living it — that goes something like this: If you're smart enough, you can figure out how to compensate. If you're really smart, ADHD shouldn't be a real problem.</p>
+
+<p>This belief causes enormous damage. It delays diagnosis, sometimes by decades. It produces adults who have spent their lives being told they're not living up to their potential, without anyone — including themselves — understanding why. It generates a specific flavor of shame that is hard to dislodge: the shame of someone who knows they are capable, watches themselves repeatedly fail to perform at that capacity, and cannot explain the gap.</p>
+
+<p>The reality is this: high intelligence and ADHD are independent variables. One does not cancel the other. A person can have an IQ of 140 and still have genuine, impairing executive dysfunction. The ADHD doesn't disappear because of the IQ. It hides — from the outside world, and often from the person themselves.</p>
+
+<p>Understanding how that hiding works is one of the most practically useful things this manual can offer.</p>
+
+<h2>What Intelligence Actually Does in This Context</h2>
+
+<p>When a high-IQ person has ADHD, their cognitive ability becomes a double-edged tool.</p>
+
+<p>On one edge: it genuinely helps. Strong verbal ability allows them to talk through problems, advocate for themselves, and mask confusion effectively. Strong long-term memory compensates for working memory gaps. Pattern recognition lets them pick up new material faster, sometimes covering gaps left by inattention. Rapid processing allows them to skim, synthesize, and approximate their way to correct answers even when they didn't follow the full process. In many academic and professional settings, these abilities buy time — sometimes years, sometimes decades.</p>
+
+<p>On the other edge: the compensation is costly, exhausting, and eventually insufficient. And because it works well enough for long enough, it often prevents the person from ever getting the understanding and support they need.</p>
+
+<p>The intelligence doesn't fix the ADHD. It finances it — on credit — until the debt comes due.</p>
+
+<h2>The Masking Mechanism</h2>
+
+<p>Masking, in this context, refers to the conscious or unconscious use of skills, strategies, social performance, and sheer effort to hide the symptoms and impairments of ADHD from others — and sometimes from oneself. High-IQ individuals with ADHD tend to be skilled, often involuntary, maskers. The mechanisms include:</p>
+
+<h3>Verbal compensation</h3>
+
+<p>Strong verbal ability allows for smooth recovery when focus lapses. If attention drifts in a meeting, a high-IQ person can often reconstruct context from the last thing they caught, ask a well-framed question that sounds engaged, or use humor to redirect. Observers see an articulate, engaged person. The person themselves experienced a significant portion of the interaction from behind a fog.</p>
+
+<h3>Last-minute performance</h3>
+
+<p>Urgency is one of the few reliable activators of the ADHD motivational system. High-IQ individuals with ADHD often produce genuinely excellent work under extreme time pressure — work that accurately reflects their ability. This becomes, in many cases, their primary evidence against their own ADHD: “I can't have ADHD, I got an A on that paper.” What goes unexamined is what it took to produce it, how many nights of sleep it cost, and how many other things fell apart while that paper consumed the last 36 hours.</p>
+
+<h3>Interest-driven performance</h3>
+
+<p>When a subject engages a high-IQ ADHD brain deeply, the results can look exceptional. Hyperfocus plus high cognitive ability is a potent combination. The person produces work that seems effortless and extraordinary.</p>
+
+<p>But this creates a misleading data point: the performance ceiling in an area of deep interest says nothing about the consistent floor. The person who writes brilliant, insightful essays on topics they love may genuinely be unable to complete basic administrative tasks — not as a choice, but as a neurological reality.</p>
+
+<h3>Social intelligence</h3>
+
+<p>Many high-IQ individuals with ADHD develop strong social radar — partly as a survival mechanism. Reading the room well, tracking social signals, knowing when something seems off — these skills allow for fluid social performance even when internally the person is scattered. Conversations may look smooth from the outside while the person inside is working hard to track the thread, suppress the impulse to interrupt, and manage the feeling that the interaction is moving either too slowly or too fast.</p>
+
+<h3>Accumulated workarounds</h3>
+
+<p>Over years, high-IQ ADHD adults build elaborate, often invisible systems of workarounds. They always arrive early to buffer against time blindness. They repeat information back to themselves immediately after receiving it. They keep notes in every pocket. They engineer their lives to minimize exposure to their weakest areas. These systems work — until they stop, or until life complexity outpaces them. But while they're working, they make the ADHD nearly invisible.</p>
+
+<h2>The Hidden Cost of Compensation</h2>
+
+<p>Here is something that rarely gets said clearly enough: Compensation is not the same as not having the condition.</p>
+
+<p>When a person with a broken leg uses a crutch skillfully, we don't say the leg isn't broken. We say the crutch is working. The effort of using the crutch, the fatigue it produces, the way it changes how the person moves through the world — all of that is real, even if the person appears to be walking.</p>
+
+<p>High-IQ ADHD adults who have spent years compensating are often exhausted in a way that's difficult to articulate. They frequently describe:</p>
+
 <ul>
   <li>Feeling like they're working twice as hard as everyone around them for comparable results</li>
   <li>A persistent sense of performance anxiety that never fully lifts</li>
-  <li>Shame and confusion about why &quot;simple&quot; things are so hard</li>
+  <li>Shame and confusion about why “simple” things are so hard</li>
   <li>A deep discrepancy between their self-image (capable, intelligent) and their daily functioning (chaotic, inconsistent, unreliable)</li>
   <li>Burnout that arrives faster and harder than their output would seem to justify</li>
 </ul>
-<p>This exhaustion is not weakness. It is the predictable result of running a high-demand compensation system for years without structural support. Why Late Diagnosis Is So Common Research consistently shows that high-IQ individuals, women, and those with the inattentive presentation of ADHD are diagnosed later — often not until adulthood, and sometimes not until their thirties, forties, or beyond.</p>
-<p>The reasons are interconnected: Academic success doesn't rule out ADHD ADHD diagnosis has historically been associated with academic failure. But high-IQ individuals with ADHD often don't fail academically — especially in earlier years when content is novel, engagement is easier to maintain, and the consequences of disorganization are limited. They may get strong grades through bursts of effort, interest-driven performance, and verbal skill. The diagnostic picture doesn't emerge clearly until the structure of school falls away, the demands of adult life accumulate, or a period of high stress overwhelms their compensation capacity. Behavioral hyperactivity is less visible in high-IQ adults The classic ADHD presentation — a child who can't stay in their seat, disrupts class, and is obviously struggling — is not the only ADHD presentation. In many high-IQ individuals, especially those with inattentive ADHD, the external behavior is quiet. The chaos is interior. The hyperactivity is mental, not physical. These individuals were often the &quot;dreamy,&quot; &quot;spacey,&quot; or &quot;in their own world&quot; children — not the ones causing problems. They rarely triggered the concern that leads to evaluation. High intelligence inflates the diagnostic threshold ADHD is diagnosed based on impairment relative to developmental expectation. A high-IQ person may be significantly impaired relative to their own potential but still functioning at or above average relative to their peers. This creates a gap in which the condition is real but the individual doesn't meet the traditional visible profile of &quot;impaired.&quot; The result: they are often told they're fine, or told they're not trying hard enough, when neither is accurate. Self-doubt compounds the delay High-IQ adults who suspect they have ADHD often talk themselves out of pursuing evaluation, for reasons including:</p>
+
+<p>This exhaustion is not weakness. It is the predictable result of running a high-demand compensation system for years without structural support.</p>
+
+<h2>Why Late Diagnosis Is So Common</h2>
+
+<p>Research consistently shows that high-IQ individuals, women, and those with the inattentive presentation of ADHD are diagnosed later — often not until adulthood, and sometimes not until their thirties, forties, or beyond.</p>
+
+<p>The reasons are interconnected:</p>
+
+<h3>Academic success doesn't rule out ADHD</h3>
+
+<p>ADHD diagnosis has historically been associated with academic failure. But high-IQ individuals with ADHD often don't fail academically — especially in earlier years when content is novel, engagement is easier to maintain, and the consequences of disorganization are limited. They may get strong grades through bursts of effort, interest-driven performance, and verbal skill. The diagnostic picture doesn't emerge clearly until the structure of school falls away, the demands of adult life accumulate, or a period of high stress overwhelms their compensation capacity.</p>
+
+<h3>Behavioral hyperactivity is less visible in high-IQ adults</h3>
+
+<p>The classic ADHD presentation — a child who can't stay in their seat, disrupts class, and is obviously struggling — is not the only ADHD presentation. In many high-IQ individuals, especially those with inattentive ADHD, the external behavior is quiet. The chaos is interior. The hyperactivity is mental, not physical. These individuals were often the “dreamy,” “spacey,” or “in their own world” children — not the ones causing problems. They rarely triggered the concern that leads to evaluation.</p>
+
+<h3>High intelligence inflates the diagnostic threshold</h3>
+
+<p>ADHD is diagnosed based on impairment relative to developmental expectation. A high-IQ person may be significantly impaired relative to their own potential but still functioning at or above average relative to their peers. This creates a gap in which the condition is real but the individual doesn't meet the traditional visible profile of “impaired.” The result: they are often told they're fine, or told they're not trying hard enough, when neither is accurate.</p>
+
+<h3>Self-doubt compounds the delay</h3>
+
+<p>High-IQ adults who suspect they have ADHD often talk themselves out of pursuing evaluation, for reasons including:</p>
+
 <ul>
-  <li>&quot;I did well in school — I can't have ADHD.&quot;</li>
-  <li>&quot;I can focus when something interests me — that means I don't have a real problem.&quot;</li>
-  <li>&quot;Other people have it worse. This is just how I am.&quot;</li>
-  <li>&quot;A real diagnosis would require real impairment. I'm just disorganized.&quot;</li>
+  <li>“I did well in school — I can't have ADHD.”</li>
+  <li>“I can focus when something interests me — that means I don't have a real problem.”</li>
+  <li>“Other people have it worse. This is just how I am.”</li>
+  <li>“A real diagnosis would require real impairment. I'm just disorganized.”</li>
 </ul>
+
 <p>These are not unreasonable thoughts. They are the logical product of a lifetime of messages that ADHD looks a specific way — and that way isn't them. But the thoughts delay help, sometimes significantly.</p>
-<h2>Gender compounds the delay further Research indicates that women and girls with ADHD</h2>
-<p>are diagnosed later than men and boys, partly because the inattentive presentation is more common in girls and is less likely to trigger teacher or parent concern. High-IQ girls with ADHD are particularly likely to mask effectively and go undiagnosed until adulthood. This is not a minor issue. A 2020 review in the Journal of Child Psychology and Psychiatry noted significant disparities in diagnosis rates between boys and girls, with girls more likely to internalize symptoms and less likely to be referred for evaluation. The &quot;But I Can Focus When I Want To&quot; Problem This is worth addressing directly, because it is among the most common reasons high-IQ adults doubt their own ADHD — and because it is specifically cited by others as evidence against the diagnosis. Yes, people with ADHD can focus. Intensely, sometimes. On things that engage them. The ADHD attention system is not broken in the sense of producing no attention. It is dysregulated in the sense of failing to produce directed, sustained, voluntary attention on demand. The engagement — not the importance, not the deadline, not the intention — largely controls the switch. This is actually evidence of ADHD, not evidence against it. A brain that can hyperfocus on a fascinating project for six hours but cannot begin a moderately important, moderately boring task despite genuine intention and effort — that is a description of ADHD attention dysregulation. The contrast, not the capacity, is the signal. The clinical term is variable performance — and it is one of the defining features of the condition. A high-IQ ADHD adult can look extraordinary one day and fall apart on the next, not because of effort or attitude but because of what the brain can access under different conditions of interest, novelty, urgency, and emotional salience. The Profile in Practice What does a high-IQ adult with ADHD actually look like, in the real world? Not the stereotype, but the reality? Often, something like this: They were identified as gifted or bright early, but also described as &quot;not working to their potential,&quot; &quot;easily distracted,&quot; &quot;disorganized,&quot; or &quot;immature.&quot; They may have sailed through early education but struggled when school became less structured or content became less novel. They are capable of genuine brilliance in bursts — then baffled by their inability to replicate it</p>
-<p>reliably. They have a string of half-finished projects, abandoned hobbies, and good intentions that stalled. They are often late — to appointments, to deadlines, to their own goals. They have developed a complicated relationship with time, which feels both abundant and somehow always gone. They are hard on themselves in a way that goes beyond ordinary self-criticism, because the gap between what they know they can do and what they actually do is a constant, painful presence. They are frequently described by others — and describe themselves — as having tremendous potential. That word, potential, has followed them like a judgment. It implies something unmet. It implies that the distance between who they are and who they could be is a choice. It isn't. What This Changes Understanding that high IQ and ADHD are independent — that intelligence compensates for but does not eliminate the condition — changes several things: It reframes the history. The missed deadlines, the abandoned projects, the inexplicable failures alongside genuine successes — these are not evidence of a character flaw. They are a consistent pattern produced by a specific neurological profile operating without adequate support or understanding. It reframes the effort. The exhaustion of years of compensation is not weakness or overdrama. It is the real cost of running a high-demand workaround system, largely alone, often without even knowing that's what you were doing. It opens the door to accurate evaluation. A person who understands that high IQ does not rule out ADHD is more likely to seek evaluation, engage honestly with a clinician, and resist the internal voice that says you don't have a real problem. It changes what help looks like. Generic ADHD advice is often insufficient for high-IQ adults. The strategies need to be sophisticated enough to engage an active mind, flexible enough to tolerate boredom, and honest enough to acknowledge that the problem isn't a lack of knowledge. Later chapters address this directly. A Word on Self-Recognition Many people reading this manual will be doing so because something clicked — a description, a pattern, a phrase that finally named something they'd been living with for years without language for it.</p>
-<p>That recognition is meaningful. It is not the same as a diagnosis, and it is not a substitute for professional evaluation. But it is not nothing. It is the beginning of a more accurate story about yourself. The goal of this chapter — and of this manual — is not to convince you that you have ADHD. It is to give you a framework accurate enough that, if the profile fits, you can stop explaining yourself with the wrong story. The wrong story has cost enough already.</p>
+
+<h3>Gender compounds the delay further</h3>
+
+<p>Research indicates that women and girls with ADHD are diagnosed later than men and boys, partly because the inattentive presentation is more common in girls and is less likely to trigger teacher or parent concern. High-IQ girls with ADHD are particularly likely to mask effectively and go undiagnosed until adulthood.</p>
+
+<p>This is not a minor issue. A 2020 review in the Journal of Child Psychology and Psychiatry noted significant disparities in diagnosis rates between boys and girls, with girls more likely to internalize symptoms and less likely to be referred for evaluation.</p>
+
+<h2>The “But I Can Focus When I Want To” Problem</h2>
+
+<p>This is worth addressing directly, because it is among the most common reasons high-IQ adults doubt their own ADHD — and because it is specifically cited by others as evidence against the diagnosis.</p>
+
+<p>Yes, people with ADHD can focus. Intensely, sometimes. On things that engage them. The ADHD attention system is not broken in the sense of producing no attention. It is dysregulated in the sense of failing to produce directed, sustained, voluntary attention on demand. The engagement — not the importance, not the deadline, not the intention — largely controls the switch.</p>
+
+<p>This is actually evidence of ADHD, not evidence against it. A brain that can hyperfocus on a fascinating project for six hours but cannot begin a moderately important, moderately boring task despite genuine intention and effort — that is a description of ADHD attention dysregulation. The contrast, not the capacity, is the signal.</p>
+
+<p>The clinical term is variable performance — and it is one of the defining features of the condition. A high-IQ ADHD adult can look extraordinary one day and fall apart on the next, not because of effort or attitude but because of what the brain can access under different conditions of interest, novelty, urgency, and emotional salience.</p>
+
+<h2>The Profile in Practice</h2>
+
+<p>What does a high-IQ adult with ADHD actually look like, in the real world? Not the stereotype, but the reality? Often, something like this:</p>
+
+<p>They were identified as gifted or bright early, but also described as “not working to their potential,” “easily distracted,” “disorganized,” or “immature.” They may have sailed through early education but struggled when school became less structured or content became less novel.</p>
+
+<p>They are capable of genuine brilliance in bursts — then baffled by their inability to replicate it reliably. They have a string of half-finished projects, abandoned hobbies, and good intentions that stalled. They are often late — to appointments, to deadlines, to their own goals. They have developed a complicated relationship with time, which feels both abundant and somehow always gone.</p>
+
+<p>They are hard on themselves in a way that goes beyond ordinary self-criticism, because the gap between what they know they can do and what they actually do is a constant, painful presence.</p>
+
+<p>They are frequently described by others — and describe themselves — as having tremendous potential. That word, potential, has followed them like a judgment. It implies something unmet. It implies that the distance between who they are and who they could be is a choice.</p>
+
+<p>It isn't.</p>
+
+<h2>What This Changes</h2>
+
+<p>Understanding that high IQ and ADHD are independent — that intelligence compensates for but does not eliminate the condition — changes several things:</p>
+
+<p><strong>It reframes the history.</strong> The missed deadlines, the abandoned projects, the inexplicable failures alongside genuine successes — these are not evidence of a character flaw. They are a consistent pattern produced by a specific neurological profile operating without adequate support or understanding.</p>
+
+<p><strong>It reframes the effort.</strong> The exhaustion of years of compensation is not weakness or overdrama. It is the real cost of running a high-demand workaround system, largely alone, often without even knowing that's what you were doing.</p>
+
+<p><strong>It opens the door to accurate evaluation.</strong> A person who understands that high IQ does not rule out ADHD is more likely to seek evaluation, engage honestly with a clinician, and resist the internal voice that says you don't have a real problem.</p>
+
+<p><strong>It changes what help looks like.</strong> Generic ADHD advice is often insufficient for high-IQ adults. The strategies need to be sophisticated enough to engage an active mind, flexible enough to tolerate boredom, and honest enough to acknowledge that the problem isn't a lack of knowledge. Later chapters address this directly.</p>
+
+<h2>A Word on Self-Recognition</h2>
+
+<p>Many people reading this manual will be doing so because something clicked — a description, a pattern, a phrase that finally named something they'd been living with for years without language for it.</p>
+
+<p>That recognition is meaningful. It is not the same as a diagnosis, and it is not a substitute for professional evaluation. But it is not nothing. It is the beginning of a more accurate story about yourself.</p>
+
+<p>The goal of this chapter — and of this manual — is not to convince you that you have ADHD. It is to give you a framework accurate enough that, if the profile fits, you can stop explaining yourself with the wrong story.</p>
+
+<p>The wrong story has cost enough already.</p>
+
       </div>
 
       <nav class="chapter-nav" aria-label="Chapter navigation">

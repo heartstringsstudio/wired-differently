@@ -3,6 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script>
+    /* Apply saved theme + font size before first paint to prevent FOUC */
+    (function () {
+      try {
+        var d = document.documentElement, s = localStorage;
+        var t = s.getItem('wired_darkMode');
+        var dark = t !== null ? JSON.parse(t)
+                              : matchMedia('(prefers-color-scheme: dark)').matches;
+        d.setAttribute('data-theme', dark ? 'dark' : 'light');
+        var f = s.getItem('wired_fontSize');
+        if (f) d.setAttribute('data-font-size', JSON.parse(f));
+      } catch (e) {}
+    })();
+  </script>
+
   <meta name="description" content="Wired Differently: A Practical Manual for Adults with High IQ and ADHD" />
   <meta name="theme-color" content="#2D6A6A" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -23,8 +39,7 @@
   <link rel="stylesheet" href="css/style.css" />
 
   <!-- Preconnect for Google Fonts (loaded in CSS) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" href="fonts/lora-var.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 <body>
 
