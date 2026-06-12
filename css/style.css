@@ -1204,6 +1204,15 @@ a:hover {
     --space-3xl: 2.5rem;
   }
 
+  /* Mobile font scale: one step smaller than desktop at every setting.
+     These must come after the :root override above — without them the
+     17px base wins over the user's chosen size and the font-size
+     controls appear to do nothing on phones. */
+  [data-font-size="sm"] { --font-size-base: 15px; }
+  [data-font-size="md"] { --font-size-base: 17px; }
+  [data-font-size="lg"] { --font-size-base: 19px; }
+  [data-font-size="xl"] { --font-size-base: 21px; }
+
   .toc { padding: var(--space-2xl) var(--space-md); }
   .chapter-view { padding: var(--space-2xl) var(--space-md); }
   .cover { padding: var(--space-2xl) var(--space-lg); }
