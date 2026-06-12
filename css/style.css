@@ -611,6 +611,11 @@ a:hover {
   margin-bottom: var(--space-md);
 }
 
+.chapter-header__of {
+  font-weight: 400;
+  opacity: 0.65;
+}
+
 .chapter-header__title {
   font-family: var(--font-body);
   font-size: clamp(1.6rem, 4vw, 2.25rem);

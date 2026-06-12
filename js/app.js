@@ -478,9 +478,9 @@ const App = {
     if (ch) {
       KeyboardNav.init(ch.num);
       Progress.saveLastChapter(chId);
-      // Update nav label
+      // Update nav label with position context ("Ch. 5 of 27 — Title")
       const label = document.querySelector('.nav__chapter-label');
-      if (label) label.textContent = `Ch. ${ch.num} — ${ch.title}`;
+      if (label) label.textContent = `Ch. ${ch.num} of ${CHAPTERS.length} — ${ch.title}`;
       document.body.classList.add('is-chapter');
     }
     this._bindThemeToggle();
