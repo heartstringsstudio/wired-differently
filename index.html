@@ -43,6 +43,35 @@
 </head>
 <body>
 
+  <!-- Book Cover Splash Screen -->
+  <div id="splash-screen" class="splash" role="button" tabindex="0"
+       aria-label="Book cover — tap to enter the app">
+    <img src="images/bookcover.png"
+         alt="Wired Differently — For Adults with High IQ and ADHD, by Tim Harbert"
+         class="splash__img" />
+    <p class="splash__hint" aria-hidden="true">Tap anywhere to continue</p>
+  </div>
+
+  <script>
+    (function () {
+      var splash = document.getElementById('splash-screen');
+      function dismiss() {
+        splash.classList.add('splash--out');
+        splash.addEventListener('transitionend', function () {
+          splash.style.display = 'none';
+        }, { once: true });
+      }
+      splash.addEventListener('click', dismiss);
+      splash.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') dismiss();
+      });
+      splash.addEventListener('touchend', function (e) {
+        e.preventDefault();
+        dismiss();
+      }, { passive: false });
+    })();
+  </script>
+
   <!-- Navigation -->
   <nav class="nav" role="navigation" aria-label="Main navigation">
     <a class="nav__brand" href="index.html" aria-label="Wired Differently home">
