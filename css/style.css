@@ -120,6 +120,14 @@ html {
   font-size: var(--font-size-base);
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* The page only ever scrolls vertically. Any stray wide element is
+     clipped instead of causing horizontal drift. `clip` (unlike
+     `hidden`) doesn't create a scroll container; `hidden` is the
+     fallback for older browsers. Elements that legitimately need
+     horizontal scrolling (e.g. wide worksheet tables) provide their
+     own overflow-x:auto container. */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -985,6 +993,11 @@ a:hover {
   text-decoration: none;
   transition: all var(--transition-fast);
   max-width: 45%;
+  /* As a flex item the button's automatic minimum is the full width of
+     its nowrap label text, so it can't shrink to fit on phones and
+     pokes past the viewport. Allow it to shrink; the label inside
+     handles truncation with an ellipsis. */
+  min-width: 0;
 }
 
 .chapter-nav__btn:hover {
@@ -1012,6 +1025,10 @@ a:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Flex items default to min-width:auto and refuse to shrink below
+     their text width, defeating the ellipsis and pushing the button
+     past the viewport on phones */
+  min-width: 0;
 }
 
 .chapter-nav__toc-btn {
