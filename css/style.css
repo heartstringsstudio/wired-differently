@@ -1070,6 +1070,53 @@ a:hover {
 }
 
 /* ============================================================
+   Bookmark List (TOC page)
+   ============================================================ */
+.toc__bookmarks .toc__part-number {
+  color: var(--accent);
+}
+
+.bookmark-item {
+  position: relative;
+}
+
+/* Keep the link clear of the remove control */
+.bookmark-item .toc__link {
+  padding-right: calc(var(--space-xl) + var(--space-md));
+}
+
+.bookmark-remove {
+  position: absolute;
+  top: 50%;
+  right: var(--space-md);
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bookmark-remove:hover {
+  color: var(--accent);
+  border-color: var(--border);
+  background: var(--bg-elevated);
+}
+
+.bookmark-remove:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================
    Font Size Controls (accessible reading)
    ============================================================ */
 .font-size-controls {

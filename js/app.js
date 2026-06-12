@@ -335,6 +335,57 @@ const BookmarkUI = {
 };
 
 /* ============================================================
+   Bookmark List (TOC page)
+   Renders saved bookmarks as a section at the top of the TOC, in
+   chapter order, each row matching the native .toc__link styling
+   with an inline remove control. Hidden entirely when empty.
+   ============================================================ */
+const BookmarkList = {
+  init() {
+    this.section = document.getElementById('toc-bookmarks');
+    this.list = document.getElementById('bookmark-list');
+    if (!this.section || !this.list) return;
+    this.render();
+  },
+  render() {
+    const ids = Bookmarks.getAll();
+    // Show in chapter order regardless of when each was added
+    const items = CHAPTERS.filter(c => ids.includes(c.id));
+    if (items.length === 0) {
+      this.section.hidden = true;
+      this.list.innerHTML = '';
+      return;
+    }
+    this.section.hidden = false;
+    this.list.innerHTML = items.map(ch => `
+      <li class="toc__item bookmark-item" data-ch="${ch.id}">
+        <a class="toc__link" href="${Paths.chapter(ch.id)}"
+           aria-label="Bookmarked — Chapter ${ch.num}: ${this._esc(ch.title)}">
+          <span class="toc__ch-num">Ch. ${ch.num}</span>
+          <span class="toc__ch-content">
+            <span class="toc__ch-title">${this._esc(ch.title)}</span>
+            <span class="toc__ch-subtitle">${this._esc(ch.subtitle)}</span>
+          </span>
+        </a>
+        <button class="bookmark-remove" type="button"
+                aria-label="Remove bookmark for Chapter ${ch.num}">&times;</button>
+      </li>`).join('');
+
+    this.list.querySelectorAll('.bookmark-remove').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = e.currentTarget.closest('.bookmark-item').dataset.ch;
+        Bookmarks.toggle(id); // toggling an existing bookmark removes it
+        this.render();
+      });
+    });
+  },
+  _esc(s) {
+    return String(s).replace(/[&<>"]/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+};
+
+/* ============================================================
    Cover Page — Resume Reading Link
    ============================================================ */
 const CoverResume = {
@@ -410,6 +461,7 @@ const App = {
     Theme.init();
     FontSize.init();
     TOCState.init();
+    BookmarkList.init();
     this._bindThemeToggle();
   },
 

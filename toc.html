@@ -73,6 +73,16 @@
         </div>
       </header>
 
+      <!-- Bookmarks — populated by JS, shown only when bookmarks exist -->
+      <section class="toc__part toc__bookmarks fade-in" id="toc-bookmarks" hidden
+               aria-labelledby="bookmarks-heading">
+        <h2 class="toc__part-header" id="bookmarks-heading">
+          <span class="toc__part-number" aria-hidden="true">★</span>
+          <span class="toc__part-title">Bookmarks</span>
+        </h2>
+        <ol class="toc__list" id="bookmark-list" aria-label="Bookmarked chapters"></ol>
+      </section>
+
       <!-- ===================================================
            PART ONE — Understanding the Profile
            Chapters 1–7
