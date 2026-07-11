@@ -39,12 +39,14 @@
   --bg-elevated:     #FFFFFF;
   --text-primary:    #1A1A1A;
   --text-secondary:  #4A4540;
-  --text-muted:      #8A7F74;
+  --text-muted:      #6F655A;
   --accent:          #2D6A6A;
   --accent-light:    #3D8A8A;
   --accent-faint:    rgba(45, 106, 106, 0.08);
   --highlight:       #C8862A;
   --highlight-faint: rgba(200, 134, 42, 0.12);
+  --brand-blue:      #2E7DB5;
+  --brand-gold:      #C8862A;
   --border:          rgba(26, 26, 26, 0.10);
   --border-strong:   rgba(26, 26, 26, 0.20);
   --shadow-sm:       0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
@@ -54,7 +56,7 @@
   /* Typography */
   --font-body:       'Lora', Georgia, 'Times New Roman', serif;
   --font-ui:         'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-size-base:  18px;
+  --font-size-base:  112.5%;
   --line-height:     1.75;
   --measure:         68ch;  /* comfortable line length */
 
@@ -94,7 +96,7 @@
   --bg-elevated:     #222222;
   --text-primary:    #F0EDE8;
   --text-secondary:  #B8B0A6;
-  --text-muted:      #6E6660;
+  --text-muted:      #9A9188;
   --accent:          #4A9B9B;
   --accent-light:    #5AABAB;
   --accent-faint:    rgba(74, 155, 155, 0.10);
@@ -169,13 +171,13 @@ a:hover {
   top: 0;
   left: 0;
   right: 0;
-  height: var(--nav-height);
+  height: calc(var(--nav-height) + env(safe-area-inset-top));
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-lg);
+  padding: env(safe-area-inset-top) max(var(--space-lg), env(safe-area-inset-right)) 0 max(var(--space-lg), env(safe-area-inset-left));
   z-index: var(--z-nav);
   transition: background-color var(--transition-med), border-color var(--transition-med);
   backdrop-filter: blur(8px);
@@ -211,8 +213,8 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -251,8 +253,9 @@ a:hover {
    Page Wrapper
    ============================================================ */
 .page {
-  padding-top: var(--nav-height);
+  padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ============================================================
@@ -260,6 +263,7 @@ a:hover {
    ============================================================ */
 .cover {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -276,8 +280,8 @@ a:hover {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(45,106,106,0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(200,134,42,0.04) 0%, transparent 70%);
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(46,125,181,0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(200,134,42,0.07) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -451,6 +455,137 @@ a:hover {
   border-bottom: 1px solid var(--border);
 }
 
+.reader-tools {
+  margin: calc(-1 * var(--space-lg)) 0 var(--space-2xl);
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, rgba(46,125,181,0.08), var(--highlight-faint));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.reader-tools__search-label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.reader-tools__search-wrap {
+  position: relative;
+}
+
+.reader-tools__search-wrap svg {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.reader-tools__search-wrap input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  font: 0.9375rem var(--font-ui);
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+}
+
+.reader-tools__search-wrap input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.reader-tools__status {
+  min-height: 1.25em;
+  margin-top: var(--space-sm);
+  font: 0.75rem var(--font-ui);
+  color: var(--text-muted);
+}
+
+.search-results {
+  list-style: none;
+  margin-top: var(--space-sm);
+}
+
+.search-results li + li {
+  border-top: 1px solid var(--border);
+}
+
+.search-results a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.875rem 0;
+  font-family: var(--font-ui);
+}
+
+.search-results strong {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.search-results span {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.data-tools {
+  margin-top: var(--space-3xl);
+  padding: var(--space-xl);
+  border-top: 2px solid var(--brand-gold);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.data-tools h2 {
+  font: 600 1rem var(--font-ui);
+  color: var(--text-primary);
+}
+
+.data-tools p {
+  margin-top: var(--space-xs);
+  font: 0.8125rem/1.5 var(--font-ui);
+  color: var(--text-muted);
+}
+
+.data-tools__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.btn {
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  font: 600 0.8125rem var(--font-ui);
+  color: var(--bg-primary);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.btn--secondary {
+  color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.btn:hover,
+.btn:focus-visible {
+  border-color: var(--accent-light);
+  box-shadow: var(--shadow-sm);
+}
+
 .toc__header-eyebrow {
   font-family: var(--font-ui);
   font-size: 0.75rem;
@@ -533,6 +668,7 @@ a:hover {
   align-items: center;
   justify-content: center;
   width: 20px;
+  color: var(--brand-blue);
   height: 20px;
   background: var(--accent-faint);
   color: var(--accent);
@@ -691,7 +827,7 @@ a:hover {
 /* Reading progress bar (thin line at top of chapter) */
 .reading-progress-bar {
   position: fixed;
-  top: var(--nav-height);
+  top: calc(var(--nav-height) + env(safe-area-inset-top));
   left: 0;
   right: 0;
   height: 2px;
@@ -702,8 +838,10 @@ a:hover {
 .reading-progress-bar__fill {
   height: 100%;
   background: var(--accent);
-  width: 0%;
-  transition: width 100ms linear;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
 }
 
 /* ============================================================
@@ -874,7 +1012,8 @@ a:hover {
 
 .worksheet-field:focus,
 .worksheet-textarea:focus {
-  outline: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
   border-color: var(--accent);
 }
 
@@ -1108,7 +1247,8 @@ a:hover {
   background: none;
   border: none;
   cursor: pointer;
-  padding: var(--space-sm);
+  min-height: 44px;
+  padding: var(--space-sm) var(--space-md);
   transition: color var(--transition-fast);
 }
 
@@ -1121,8 +1261,8 @@ a:hover {
    ============================================================ */
 .bookmark-btn {
   position: fixed;
-  bottom: var(--space-xl);
-  right: var(--space-xl);
+  bottom: max(var(--space-xl), calc(env(safe-area-inset-bottom) + var(--space-sm)));
+  right: max(var(--space-xl), env(safe-area-inset-right));
   width: 44px;
   height: 44px;
   background: var(--bg-elevated);
@@ -1181,8 +1321,8 @@ a:hover {
   top: 50%;
   right: var(--space-md);
   transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1240,10 +1380,10 @@ a:hover {
 }
 
 /* Font size scale applied to body */
-[data-font-size="sm"] { --font-size-base: 16px; }
-[data-font-size="md"] { --font-size-base: 18px; }  /* default */
-[data-font-size="lg"] { --font-size-base: 20px; }
-[data-font-size="xl"] { --font-size-base: 22px; }
+[data-font-size="sm"] { --font-size-base: 100%; }
+[data-font-size="md"] { --font-size-base: 112.5%; }  /* default */
+[data-font-size="lg"] { --font-size-base: 125%; }
+[data-font-size="xl"] { --font-size-base: 137.5%; }
 
 /* ============================================================
    Empty State / Loading
@@ -1284,7 +1424,6 @@ a:hover {
 /* Tight padding on small screens */
 @media (max-width: 480px) {
   :root {
-    --font-size-base: 17px;
     --space-xl: 1.25rem;
     --space-2xl: 2rem;
     --space-3xl: 2.5rem;
@@ -1294,23 +1433,20 @@ a:hover {
      These must come after the :root override above — without them the
      17px base wins over the user's chosen size and the font-size
      controls appear to do nothing on phones. */
-  [data-font-size="sm"] { --font-size-base: 15px; }
-  [data-font-size="md"] { --font-size-base: 17px; }
-  [data-font-size="lg"] { --font-size-base: 19px; }
-  [data-font-size="xl"] { --font-size-base: 21px; }
-
   .toc { padding: var(--space-2xl) var(--space-md); }
   .chapter-view { padding: var(--space-2xl) var(--space-md); }
   .cover { padding: var(--space-2xl) var(--space-lg); }
 
   .chapter-nav__btn { font-size: 0.8rem; }
 
-  .nav__chapter-label { max-width: 130px; }
+  .nav__chapter-label { max-width: 105px; }
 }
 
 /* Comfortable mid-range */
 @media (min-width: 768px) {
-  .nav { padding: 0 var(--space-xl); }
+  .nav {
+    padding: env(safe-area-inset-top) max(var(--space-xl), env(safe-area-inset-right)) 0 max(var(--space-xl), env(safe-area-inset-left));
+  }
   .chapter-nav__btn { max-width: none; }
 }
 
@@ -1412,6 +1548,12 @@ html[data-skip-splash] .splash {
 .fade-in-delay-2 { animation-delay: 200ms; }
 .fade-in-delay-3 { animation-delay: 350ms; }
 .fade-in-delay-4 { animation-delay: 500ms; }
+
+/* Chapter turns already use a cross-document transition; replaying every
+   entrance animation makes repeat reading feel sluggish. */
+body[data-ch-id] .fade-in {
+  animation: none;
+}
 
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {

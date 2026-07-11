@@ -2,7 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <script>
+    /* The fallback is rendered at the failed request URL. Anchor relative
+       links to the service-worker scope so it also works after a repo rename. */
+    (function () {
+      var base = document.createElement('base');
+      var scriptURL = navigator.serviceWorker && navigator.serviceWorker.controller &&
+                      navigator.serviceWorker.controller.scriptURL;
+      base.href = scriptURL ? new URL('./', scriptURL).href : './';
+      document.head.appendChild(base);
+    })();
+  </script>
   <script>
     /* Apply saved theme + font size before first paint to prevent FOUC */
     (function () {
@@ -41,7 +52,7 @@
       margin: 0;
     }
     .offline-wrap p {
-      color: var(--color-muted);
+      color: var(--text-muted);
       max-width: 40ch;
       margin: 0;
     }
@@ -54,7 +65,7 @@
   <div class="offline-wrap">
     <div class="offline-icon">📵</div>
     <h1>You're offline</h1>
-    <p>This page isn't saved yet. Chapters you've already visited are available offline.</p>
+    <p>The complete book is saved for offline reading. Return to the contents and choose a chapter.</p>
     <a href="toc.html" class="btn">Go to table of contents</a>
   </div>
 </body>
