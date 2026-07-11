@@ -96,7 +96,7 @@ const Theme = {
   },
   apply(isDark) {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#141414' : '#2D6A6A');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#06101F');
     this.updateToggle(isDark);
   },
   toggle() {
