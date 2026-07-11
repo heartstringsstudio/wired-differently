@@ -396,8 +396,15 @@ const CoverResume = {
     if (!ch) return;
     const el = document.getElementById('resume-reading');
     if (!el) return;
-    el.innerHTML = `Resume: <a href="${Paths.chapter(ch.id)}">Chapter ${ch.num} — ${ch.title}</a>`;
+    el.innerHTML = `
+      <a href="${Paths.chapter(ch.id)}" class="cover__resume-btn"
+         aria-label="Continue reading — Chapter ${ch.num}: ${ch.title}">
+        <span class="cover__resume-btn-kicker">Continue reading</span>
+        <span class="cover__resume-btn-title">Ch. ${ch.num} — ${ch.title}</span>
+      </a>`;
     el.classList.add('visible');
+    // Returning readers resume; starting over becomes the secondary action
+    document.querySelector('.cover__enter-btn')?.classList.add('cover__enter-btn--secondary');
   }
 };
 
