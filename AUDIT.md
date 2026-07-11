@@ -132,9 +132,9 @@ Ordered for one-PR-at-a-time implementation; each is independent unless noted.
 
 | # | Fix | Findings | Effort |
 |---|-----|----------|--------|
-| 1 | Re-encode `images/bookcover.png` → WebP/JPEG ≤ 250 KB | F1, P2 | **quick** |
-| 2 | Splash: auto-dismiss + skip for returning readers; make Resume the prominent action on the cover | U1, U3 | **quick** |
-| 3 | Persist Chapter 23 worksheet inputs to localStorage (debounced save/restore + clear button) | U2 | **moderate** |
+| 1 | ✅ **Fixed 2026-07-11** — cover re-encoded to WebP (1.9 MB → 159 KB), SW cache bumped to v10 | F1, P2 | ~~quick~~ |
+| 2 | ✅ **Fixed 2026-07-11** — splash auto-dismisses (~1.8 s), shows once per session; cover now has a prominent "Continue reading" button and Begin Reading demotes to secondary | U1, U3 | ~~quick~~ |
+| 3 | ✅ **Fixed 2026-07-11** — worksheet fields persist to `wired_worksheet_<ch>` (debounced save, restore on load, confirm-guarded clear button) | U2 | ~~moderate~~ |
 | 4 | SW: stale-while-revalidate for HTML/CSS/JS, cache-first for fonts/icons; switch precache list to scope-relative URLs | P1, P4 | **moderate** |
 | 5 | Fix `offline.html` link/stylesheet resolution (root-relative hrefs or inlined CSS) | P3 | **quick** |
 | 6 | Contrast + tap targets: bump `--text-muted` both themes to ≥4.5:1; ≥44 px hit areas on nav buttons, Contents link, bookmark-remove | A1, U14 | **quick** |
