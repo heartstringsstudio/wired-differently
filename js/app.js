@@ -503,7 +503,7 @@ const CoverResume = {
     const el = document.getElementById('resume-reading');
     if (!el) return;
     el.innerHTML = `
-      <a href="${Paths.chapter(ch.id)}" class="cover__resume-btn"
+      <a href="${Paths.chapter(ch.id)}" target="_self" data-direct-nav class="cover__resume-btn"
          aria-label="Continue reading — Chapter ${ch.num}: ${ch.title}">
         <span class="cover__resume-btn-kicker">Continue reading</span>
         <span class="cover__resume-btn-title">Ch. ${ch.num} — ${ch.title}</span>
@@ -511,6 +511,28 @@ const CoverResume = {
     el.classList.add('visible');
     // Returning readers resume; starting over becomes the secondary action
     document.querySelector('.cover__enter-btn')?.classList.add('cover__enter-btn--secondary');
+  }
+};
+
+/* ============================================================
+   Embedded Browser Compatibility
+   Facebook/Messenger/Instagram WebViews occasionally suppress ordinary
+   anchor navigation around animated overlays. Use an explicit same-window
+   location change for the cover's primary actions in those environments.
+   ============================================================ */
+const EmbeddedBrowserCompat = {
+  isEmbedded() {
+    return document.documentElement.hasAttribute('data-embedded-browser') ||
+      /FBAN|FBAV|FB_IAB|Messenger|Instagram/i.test(navigator.userAgent);
+  },
+  init() {
+    if (!this.isEmbedded()) return;
+    document.querySelectorAll('a[data-direct-nav]').forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        window.location.assign(link.href);
+      });
+    });
   }
 };
 
@@ -699,6 +721,7 @@ const App = {
     Theme.init();
     FontSize.init();
     CoverResume.init();
+    EmbeddedBrowserCompat.init();
     this._bindThemeToggle();
   },
 
