@@ -3,7 +3,7 @@
  * Fresh content online, complete-book fallback offline.
  */
 
-const APP_CACHE = 'wired-differently-app-v12';
+const APP_CACHE = 'wired-differently-app-v13';
 const ASSET_CACHE = 'wired-differently-assets-v1';
 const CACHE_PREFIX = 'wired-differently-';
 

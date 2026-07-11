@@ -22,6 +22,11 @@
           d.setAttribute('data-skip-splash', '');
         }
       } catch (e) {}
+      /* Facebook, Messenger, and Instagram use embedded WebViews whose
+         tap/transition behavior differs from full browsers. */
+      if (/FBAN|FBAV|FB_IAB|Messenger|Instagram/i.test(navigator.userAgent)) {
+        d.setAttribute('data-embedded-browser', '');
+      }
     })();
   </script>
 
@@ -67,8 +72,20 @@
       if (document.documentElement.hasAttribute('data-skip-splash')) return;
       try { sessionStorage.setItem('wired_splashSeen', '1'); } catch (e) {}
       var timer = setTimeout(dismiss, 1800);
+      var dismissed = false;
       function dismiss() {
+        if (dismissed) return;
+        dismissed = true;
         clearTimeout(timer);
+        /* Stop the full-screen layer from intercepting the next tap before
+           waiting for any visual transition to finish. */
+        splash.style.pointerEvents = 'none';
+        splash.setAttribute('aria-hidden', 'true');
+        splash.setAttribute('inert', '');
+        if (document.documentElement.hasAttribute('data-embedded-browser')) {
+          splash.style.display = 'none';
+          return;
+        }
         splash.classList.add('splash--out');
         splash.addEventListener('transitionend', function () {
           splash.style.display = 'none';
@@ -132,7 +149,8 @@
 
       <div class="cover__resume fade-in fade-in-delay-3" id="resume-reading" aria-live="polite"></div>
 
-      <a href="toc.html" class="cover__enter-btn fade-in fade-in-delay-3"
+      <a href="toc.html" target="_self" data-direct-nav
+         class="cover__enter-btn fade-in fade-in-delay-3"
          aria-label="Open table of contents">
         Begin Reading
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
