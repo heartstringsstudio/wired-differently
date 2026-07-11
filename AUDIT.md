@@ -1,10 +1,12 @@
 # Wired Differently — PWA Ebook Audit
 
-**Date:** 2026-07-11 · **Scope:** full audit of reader usability, PWA correctness, performance, code health, accessibility, and discoverability. Read-only — no code changed. Supersedes the 2026-06-11 reading-experience audit (most of its HIGH findings — content re-segmentation, worksheet rebuild, path bugs, arrow-key hijack, broken SW precache — have since been fixed and are re-verified below).
+**Date:** 2026-07-11 · **Scope:** full audit of reader usability, PWA correctness, performance, code health, accessibility, and discoverability.
+
+> **Implementation update — 2026-07-11:** The body below is retained as the original audit baseline. The implementation now resolves the cover, splash/resume, worksheet persistence, service-worker freshness, offline fallback, scope-relative precache, mobile safe areas, tap targets, contrast, touch navigation, progress semantics, scroll restoration, chapter headings, print consistency, duplicate icons, and progress-bar performance findings. It also adds full-book search and reader-data export/restore. The principal remaining architectural recommendation is a full static page generator for the repeated chapter chrome; service-worker registration and book metadata behavior have already been centralized as a low-risk first step.
 
 ## Executive Summary
 
-The build is in good shape: all 27 chapters share one consistent template, every TOC and prev/next link resolves correctly, offline precaching is complete, and progress tracking works and survives refresh. The three problems that most hurt a reader today are the 1.9 MB cover image that dominates every launch and the service-worker payload, the splash screen that demands a tap on every single open, and the 200+ worksheet fields in Chapter 23 that silently lose everything a reader types. The service worker works but its cache-first-everything strategy means any deploy that forgets to bump the version string leaves readers stale forever. Code health is solid at the JS/CSS level but the 29 HTML pages carry hand-copied chrome (nav, footer, inline scripts) that has already drifted once (ch01's Next button). Accessibility is above average for a hand-built app, with two real gaps: muted-text contrast fails WCAG AA in both themes, and several tap targets are under 44 px.
+The current build is in strong shape: all 27 chapters remain available offline, online readers receive fresh documents, progress and worksheet data survive refresh, and readers can now search and back up their data. Mobile safe-area handling, touch navigation, larger targets, stronger contrast, and browser-respecting font scaling materially improve the installed-app experience. The remaining significant maintenance investment is generating the repeated chapter HTML from a single template.
 
 ---
 

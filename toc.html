@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <script>
     /* Apply saved theme + font size before first paint to prevent FOUC */
@@ -30,6 +30,8 @@
 
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preload" href="fonts/lora-var.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/lora-var-italic.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/dmsans-var.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 <body>
 
@@ -72,6 +74,20 @@
           <span class="toc__progress-label" id="toc-progress-label">0% complete</span>
         </div>
       </header>
+
+      <section class="reader-tools fade-in" aria-labelledby="search-heading">
+        <h2 class="sr-only" id="search-heading">Search this book</h2>
+        <label class="reader-tools__search-label" for="book-search">Find a topic in the book</label>
+        <div class="reader-tools__search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>
+          </svg>
+          <input id="book-search" type="search" autocomplete="off"
+                 placeholder="Search chapters and text…" />
+        </div>
+        <p class="reader-tools__status" id="search-status" aria-live="polite"></p>
+        <ol class="search-results" id="search-results"></ol>
+      </section>
 
       <!-- Bookmarks — populated by JS, shown only when bookmarks exist -->
       <section class="toc__part toc__bookmarks fade-in" id="toc-bookmarks" hidden
@@ -318,7 +334,7 @@
 
           <li class="toc__item">
             <a class="toc__link" href="chapters/ch13.html" data-ch="ch13"
-               aria-label="Chapter 13: Productivity Strategies for Smart, Restless Brains">
+               aria-label="Chapter 13: Productivity Strategies">
               <span class="toc__ch-num">Ch. 13</span>
               <span class="toc__ch-content">
                 <span class="toc__ch-title">Productivity Strategies</span>
@@ -614,17 +630,21 @@
         </ol>
       </section>
 
+      <section class="data-tools" aria-labelledby="data-tools-heading">
+        <div>
+          <h2 id="data-tools-heading">Keep your reading data safe</h2>
+          <p>Download a private backup of your progress, bookmarks, settings, and worksheet answers.</p>
+        </div>
+        <div class="data-tools__actions">
+          <button class="btn btn--secondary" type="button" id="export-data">Export backup</button>
+          <button class="btn btn--secondary" type="button" id="import-data">Restore backup</button>
+          <input class="sr-only" type="file" id="import-data-file" accept="application/json,.json" />
+        </div>
+        <p class="reader-tools__status" id="data-status" aria-live="polite"></p>
+      </section>
+
     </div><!-- /.toc -->
   </main>
-
-  <!-- Service Worker -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      });
-    }
-  </script>
 
   <script src="js/app.js"></script>
   <script>

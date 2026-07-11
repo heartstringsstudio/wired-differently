@@ -96,6 +96,7 @@ const Theme = {
   },
   apply(isDark) {
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#141414' : '#2D6A6A');
     this.updateToggle(isDark);
   },
   toggle() {
@@ -203,18 +204,27 @@ const Bookmarks = {
 const ReadingProgressBar = {
   el: null,
   fill: null,
+  ticking: false,
   init() {
     this.el = document.getElementById('reading-progress-bar');
     this.fill = document.getElementById('reading-progress-fill');
     if (!this.el) return;
-    window.addEventListener('scroll', () => this.update(), { passive: true });
+    window.addEventListener('scroll', () => {
+      if (this.ticking) return;
+      this.ticking = true;
+      requestAnimationFrame(() => {
+        this.update();
+        this.ticking = false;
+      });
+    }, { passive: true });
+    this.update();
   },
   update() {
     if (!this.fill) return;
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
-    this.fill.style.width = pct + '%';
+    this.fill.style.transform = `scaleX(${pct / 100})`;
   },
   show() { if (this.el) this.el.style.display = 'block'; },
   hide() { if (this.el) this.el.style.display = 'none'; }
@@ -270,7 +280,9 @@ const ScrollPersist = {
     // Restore saved position
     const saved = Progress.getScroll(chId);
     if (saved > 0) {
-      requestAnimationFrame(() => window.scrollTo(0, saved));
+      const restore = () => requestAnimationFrame(() => window.scrollTo(0, saved));
+      if (document.fonts?.ready) document.fonts.ready.then(restore);
+      else restore();
     }
     // Save on scroll (debounced)
     window.addEventListener('scroll', () => {
@@ -297,7 +309,7 @@ const AutoRead = {
   init(chId) {
     let marked = Progress.isRead(chId);
     if (marked) return;
-    window.addEventListener('scroll', () => {
+    const check = () => {
       if (marked) return;
       const scrolled = window.scrollY + window.innerHeight;
       const total = document.documentElement.scrollHeight;
@@ -309,7 +321,9 @@ const AutoRead = {
           el.classList.add('is-read');
         });
       }
-    }, { passive: true });
+    };
+    window.addEventListener('scroll', check, { passive: true });
+    check();
   }
 };
 
@@ -518,6 +532,138 @@ const TOCState = {
     const pct = Progress.getPercent();
     if (fill) fill.style.width = pct + '%';
     if (label) label.textContent = pct + '% complete';
+    document.getElementById('toc-progress-fill-wrap')?.setAttribute('aria-valuenow', String(pct));
+  }
+};
+
+/* Register once from the shared script so service-worker behavior cannot
+   drift between the cover, contents, and chapter templates. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(Paths.root() + 'sw.js').catch(() => {});
+  });
+}
+
+/* ============================================================
+   Touch Navigation — deliberate horizontal swipe only
+   ============================================================ */
+const TouchNav = {
+  startX: 0,
+  startY: 0,
+  startedOnControl: false,
+  init(chapterNum) {
+    document.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      this.startedOnControl = Boolean(e.target.closest('a, button, input, textarea, select, label'));
+      this.startX = e.touches[0].clientX;
+      this.startY = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchend', e => {
+      if (this.startedOnControl || e.changedTouches.length !== 1) return;
+      const dx = e.changedTouches[0].clientX - this.startX;
+      const dy = e.changedTouches[0].clientY - this.startY;
+      if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+      const target = Nav.getChapterByNum(chapterNum + (dx < 0 ? 1 : -1));
+      if (target) window.location.href = Paths.chapter(target.id);
+    }, { passive: true });
+  }
+};
+
+/* ============================================================
+   TOC Search — loads the cached chapter text only when requested
+   ============================================================ */
+const BookSearch = {
+  index: null,
+  timer: null,
+  init() {
+    this.input = document.getElementById('book-search');
+    this.results = document.getElementById('search-results');
+    this.status = document.getElementById('search-status');
+    if (!this.input || !this.results) return;
+    this.input.addEventListener('input', () => {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => this.run(this.input.value.trim()), 250);
+    });
+  },
+  async buildIndex() {
+    if (this.index) return this.index;
+    this.status.textContent = 'Preparing book search…';
+    this.index = await Promise.all(CHAPTERS.map(async ch => {
+      try {
+        const response = await fetch(Paths.chapter(ch.id));
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return { ...ch, text: (doc.querySelector('#chapter-content')?.textContent || '').replace(/\s+/g, ' ').trim() };
+      } catch {
+        return { ...ch, text: '' };
+      }
+    }));
+    this.status.textContent = '';
+    return this.index;
+  },
+  async run(query) {
+    if (query.length < 2) {
+      this.results.innerHTML = '';
+      this.status.textContent = query ? 'Type at least two characters.' : '';
+      return;
+    }
+    const index = await this.buildIndex();
+    const needle = query.toLocaleLowerCase();
+    const matches = index.filter(ch =>
+      `${ch.title} ${ch.subtitle} ${ch.text}`.toLocaleLowerCase().includes(needle));
+    this.status.textContent = `${matches.length} chapter${matches.length === 1 ? '' : 's'} found`;
+    this.results.innerHTML = matches.slice(0, 20).map(ch => {
+      const text = ch.text;
+      const at = text.toLocaleLowerCase().indexOf(needle);
+      const start = Math.max(0, at - 70);
+      const snippet = at >= 0 ? `${start ? '…' : ''}${text.slice(start, at + query.length + 100)}…` : ch.subtitle;
+      return `<li><a href="${Paths.chapter(ch.id)}"><strong>Ch. ${ch.num}: ${this.escape(ch.title)}</strong><span>${this.escape(snippet)}</span></a></li>`;
+    }).join('');
+  },
+  escape(value) {
+    return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+};
+
+/* ============================================================
+   Reader Data Backup — portable progress, settings and worksheets
+   ============================================================ */
+const DataPortability = {
+  init() {
+    this.status = document.getElementById('data-status');
+    document.getElementById('export-data')?.addEventListener('click', () => this.export());
+    const input = document.getElementById('import-data-file');
+    document.getElementById('import-data')?.addEventListener('click', () => input?.click());
+    input?.addEventListener('change', () => this.import(input.files?.[0]));
+  },
+  export() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('wired_')) data[key] = localStorage.getItem(key);
+    }
+    const payload = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), data }, null, 2);
+    const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `wired-differently-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    if (this.status) this.status.textContent = 'Backup downloaded.';
+  },
+  async import(file) {
+    if (!file) return;
+    try {
+      const payload = JSON.parse(await file.text());
+      if (payload?.version !== 1 || !payload.data || typeof payload.data !== 'object') throw new Error('Invalid backup');
+      Object.entries(payload.data).forEach(([key, value]) => {
+        if (key.startsWith('wired_') && typeof value === 'string') localStorage.setItem(key, value);
+      });
+      if (this.status) this.status.textContent = 'Backup restored. Refreshing…';
+      window.setTimeout(() => window.location.reload(), 500);
+    } catch {
+      if (this.status) this.status.textContent = 'That file is not a valid Wired Differently backup.';
+    }
   }
 };
 
@@ -540,7 +686,7 @@ const KeyboardNav = {
         if (next) window.location.href = Paths.chapter(next.id);
       }
       if (e.key === 't' || e.key === 'T') Nav.goToTOC();
-      if (e.key === 'b' || e.key === 'B') BookmarkUI.init && document.getElementById('bookmark-btn')?.click();
+      if (e.key === 'b' || e.key === 'B') document.getElementById('bookmark-btn')?.click();
     });
   }
 };
@@ -561,6 +707,8 @@ const App = {
     FontSize.init();
     TOCState.init();
     BookmarkList.init();
+    BookSearch.init();
+    DataPortability.init();
     this._bindThemeToggle();
   },
 
@@ -577,10 +725,15 @@ const App = {
     const ch = CHAPTERS.find(c => c.id === chId);
     if (ch) {
       KeyboardNav.init(ch.num);
+      TouchNav.init(ch.num);
       Progress.saveLastChapter(chId);
       // Update nav label with position context ("Ch. 5 of 27 — Title")
       const label = document.querySelector('.nav__chapter-label');
-      if (label) label.textContent = `Ch. ${ch.num} of ${CHAPTERS.length} — ${ch.title}`;
+      if (label) {
+        label.textContent = window.matchMedia('(max-width: 480px)').matches
+          ? `Ch. ${ch.num} / ${CHAPTERS.length}`
+          : `Ch. ${ch.num} of ${CHAPTERS.length} — ${ch.title}`;
+      }
       document.body.classList.add('is-chapter');
     }
     this._bindThemeToggle();
