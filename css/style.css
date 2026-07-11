@@ -365,20 +365,66 @@ a:hover {
 }
 
 .cover__resume {
-  margin-top: var(--space-lg);
-  font-family: var(--font-ui);
-  font-size: 0.8125rem;
-  color: var(--text-muted);
   display: none;
+  margin-bottom: var(--space-md);
 }
 
 .cover__resume.visible {
   display: block;
 }
 
-.cover__resume a {
-  color: var(--highlight);
-  font-weight: 500;
+/* Primary action for returning readers — jumps straight back into the book */
+.cover__resume-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  font-family: var(--font-ui);
+  color: var(--bg-primary);
+  background: var(--accent);
+  padding: 0.875rem 2.25rem;
+  border-radius: 100px;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cover__resume-btn:hover {
+  background: var(--accent-light);
+  color: var(--bg-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cover__resume-btn:active {
+  transform: translateY(0);
+}
+
+.cover__resume-btn-kicker {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.cover__resume-btn-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* When a resume button is present, Begin Reading steps down to secondary */
+.cover__enter-btn--secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border-strong);
+  box-shadow: none;
+}
+
+.cover__enter-btn--secondary:hover {
+  background: var(--accent-faint);
+  color: var(--accent);
+  box-shadow: none;
 }
 
 .cover__meta {
@@ -832,6 +878,29 @@ a:hover {
   border-color: var(--accent);
 }
 
+.worksheet-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-xl);
+  min-height: 44px;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.worksheet-clear-btn:hover {
+  background: var(--accent-faint);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .prose .worksheet-checks {
   list-style: none;
   padding-left: 0;
@@ -1260,7 +1329,8 @@ a:hover {
   .nav,
   .reading-progress-bar,
   .bookmark-btn,
-  .chapter-nav {
+  .chapter-nav,
+  .worksheet-clear-btn {
     display: none !important;
   }
 
@@ -1319,6 +1389,11 @@ a:hover {
 
 .splash--out {
   opacity: 0;
+}
+
+/* Splash already shown this session — skip it entirely */
+html[data-skip-splash] .splash {
+  display: none;
 }
 
 /* ============================================================

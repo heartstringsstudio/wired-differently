@@ -4,13 +4,13 @@
  * Version the cache name to force updates when files change
  */
 
-const CACHE_NAME = 'wired-differently-v9';
+const CACHE_NAME = 'wired-differently-v10';
 
 const ASSETS = [
   /* Root */
   '/wired-differently/',
   '/wired-differently/index.html',
-  '/wired-differently/images/bookcover.png',
+  '/wired-differently/images/bookcover.webp',
   '/wired-differently/toc.html',
   '/wired-differently/manifest.json',
 

@@ -16,6 +16,7 @@ const LS = {
   FONT_SIZE:     'wired_fontSize',
   PROGRESS:      'wired_progress_',
   BOOKMARKS:     'wired_bookmarks',
+  WORKSHEET:     'wired_worksheet_',
 };
 
 const CHAPTERS = [
@@ -313,6 +314,97 @@ const AutoRead = {
 };
 
 /* ============================================================
+   Worksheet Persistence (chapters with form fields, e.g. ch23)
+   Snapshots every input/textarea inside #chapter-content to
+   localStorage so answers survive navigation and reloads. Fields
+   are keyed by DOM position, which is stable because chapter
+   content is final. No-op on chapters without fields.
+   ============================================================ */
+const WorksheetPersist = {
+  chId: null,
+  fields: [],
+  saveTimer: null,
+
+  init(chId) {
+    const container = document.getElementById('chapter-content');
+    if (!container) return;
+    this.fields = Array.from(container.querySelectorAll('input, textarea, select'));
+    if (this.fields.length === 0) return;
+    this.chId = chId;
+
+    this.restore();
+
+    container.addEventListener('input', () => this.scheduleSave());
+    container.addEventListener('change', () => this.scheduleSave());
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.save();
+    });
+
+    this.addClearControl(container);
+  },
+
+  key() {
+    return LS.WORKSHEET + this.chId;
+  },
+
+  scheduleSave() {
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => this.save(), 400);
+  },
+
+  save() {
+    clearTimeout(this.saveTimer);
+    const data = {};
+    this.fields.forEach((el, i) => {
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.checked) data[i] = true;
+      } else if (el.value !== '') {
+        data[i] = el.value;
+      }
+    });
+    Storage.set(this.key(), data);
+  },
+
+  restore() {
+    const data = Storage.get(this.key());
+    if (!data) return;
+    this.fields.forEach((el, i) => {
+      if (!(i in data)) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = true;
+      } else {
+        el.value = data[i];
+      }
+    });
+  },
+
+  clear() {
+    Storage.remove(this.key());
+    this.fields.forEach(el => {
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = false;
+      } else {
+        el.value = '';
+      }
+    });
+  },
+
+  addClearControl(container) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'worksheet-clear-btn';
+    btn.textContent = 'Clear saved answers';
+    btn.setAttribute('aria-label', 'Clear all saved answers in this chapter');
+    btn.addEventListener('click', () => {
+      if (window.confirm('Clear all saved answers in this chapter? This cannot be undone.')) {
+        this.clear();
+      }
+    });
+    container.appendChild(btn);
+  }
+};
+
+/* ============================================================
    Bookmark Button Init (in chapter pages)
    ============================================================ */
 const BookmarkUI = {
@@ -396,8 +488,15 @@ const CoverResume = {
     if (!ch) return;
     const el = document.getElementById('resume-reading');
     if (!el) return;
-    el.innerHTML = `Resume: <a href="${Paths.chapter(ch.id)}">Chapter ${ch.num} — ${ch.title}</a>`;
+    el.innerHTML = `
+      <a href="${Paths.chapter(ch.id)}" class="cover__resume-btn"
+         aria-label="Continue reading — Chapter ${ch.num}: ${ch.title}">
+        <span class="cover__resume-btn-kicker">Continue reading</span>
+        <span class="cover__resume-btn-title">Ch. ${ch.num} — ${ch.title}</span>
+      </a>`;
     el.classList.add('visible');
+    // Returning readers resume; starting over becomes the secondary action
+    document.querySelector('.cover__enter-btn')?.classList.add('cover__enter-btn--secondary');
   }
 };
 
@@ -473,6 +572,7 @@ const App = {
     ScrollPersist.init(chId);
     AutoRead.init(chId);
     BookmarkUI.init(chId);
+    WorksheetPersist.init(chId);
 
     const ch = CHAPTERS.find(c => c.id === chId);
     if (ch) {

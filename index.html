@@ -16,6 +16,12 @@
         var f = s.getItem('wired_fontSize');
         if (f) d.setAttribute('data-font-size', JSON.parse(f));
       } catch (e) {}
+      /* Skip the cover splash if it was already shown this session */
+      try {
+        if (sessionStorage.getItem('wired_splashSeen')) {
+          d.setAttribute('data-skip-splash', '');
+        }
+      } catch (e) {}
     })();
   </script>
 
@@ -46,7 +52,7 @@
   <!-- Book Cover Splash Screen -->
   <div id="splash-screen" class="splash" role="button" tabindex="0"
        aria-label="Book cover — tap to enter the app">
-    <img src="images/bookcover.png"
+    <img src="images/bookcover.webp"
          alt="Wired Differently — For Adults with High IQ and ADHD, by Tim Harbert"
          class="splash__img" />
     <p class="splash__hint" aria-hidden="true">Tap anywhere to continue</p>
@@ -55,11 +61,19 @@
   <script>
     (function () {
       var splash = document.getElementById('splash-screen');
+      /* Already shown this session — CSS keeps it hidden, nothing to do */
+      if (document.documentElement.hasAttribute('data-skip-splash')) return;
+      try { sessionStorage.setItem('wired_splashSeen', '1'); } catch (e) {}
+      var timer = setTimeout(dismiss, 1800);
       function dismiss() {
+        clearTimeout(timer);
         splash.classList.add('splash--out');
         splash.addEventListener('transitionend', function () {
           splash.style.display = 'none';
         }, { once: true });
+        /* Belt-and-braces: hide even if transitionend never fires
+           (e.g. reduced-motion collapses the transition) */
+        setTimeout(function () { splash.style.display = 'none'; }, 800);
       }
       splash.addEventListener('click', dismiss);
       splash.addEventListener('keydown', function (e) {
@@ -114,6 +128,8 @@
 
       <div class="cover__divider fade-in fade-in-delay-2" aria-hidden="true"></div>
 
+      <div class="cover__resume fade-in fade-in-delay-3" id="resume-reading" aria-live="polite"></div>
+
       <a href="toc.html" class="cover__enter-btn fade-in fade-in-delay-3"
          aria-label="Open table of contents">
         Begin Reading
@@ -122,8 +138,6 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
         </svg>
       </a>
-
-      <p class="cover__resume fade-in fade-in-delay-4" id="resume-reading" aria-live="polite"></p>
 
       <p class="cover__meta fade-in fade-in-delay-4" aria-hidden="true">
         27 Chapters &nbsp;·&nbsp; Complete Manual
