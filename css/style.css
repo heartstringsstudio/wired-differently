@@ -878,6 +878,29 @@ a:hover {
   border-color: var(--accent);
 }
 
+.worksheet-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-xl);
+  min-height: 44px;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.worksheet-clear-btn:hover {
+  background: var(--accent-faint);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .prose .worksheet-checks {
   list-style: none;
   padding-left: 0;
@@ -1306,7 +1329,8 @@ a:hover {
   .nav,
   .reading-progress-bar,
   .bookmark-btn,
-  .chapter-nav {
+  .chapter-nav,
+  .worksheet-clear-btn {
     display: none !important;
   }
 
