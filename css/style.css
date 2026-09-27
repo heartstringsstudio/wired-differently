@@ -353,11 +353,65 @@ a:hover {
   line-height: 1.25;
 }
 
-.nav__chapter-label > span {
+/* The label is the button for the chapter's section list */
+button.nav__chapter-label {
+  min-width: 0;
+  min-height: 44px;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  margin: 0 -0.5rem;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: rgba(247, 243, 232, 0.68);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+button.nav__chapter-label:hover,
+button.nav__chapter-label[aria-expanded="true"] {
+  background: rgba(98, 200, 242, 0.12);
+  color: var(--brand-cream);
+}
+
+button.nav__chapter-label:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: -2px;
+}
+
+button.nav__chapter-label:disabled {
+  cursor: default;
+  background: transparent;
+}
+
+.nav__chapter-line {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   max-width: 100%;
+  min-width: 0;
+}
+
+.nav__chapter-line > span:not(.nav__chapter-chevron),
+.nav__chapter-meta {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.nav__chapter-chevron {
+  flex-shrink: 0;
+  display: inline-flex;
+  opacity: 0.7;
+}
+
+.nav__chapter-chevron svg {
+  width: 14px;
+  height: 14px;
 }
 
 .nav__chapter-label-short { display: none; }
@@ -1126,6 +1180,7 @@ a:hover {
 }
 
 .prose h2 {
+  scroll-margin-top: calc(var(--nav-height) + env(safe-area-inset-top) + var(--space-lg));
   font-family: var(--font-body);
   font-size: 1.35rem;
   font-weight: 700;
@@ -1484,7 +1539,8 @@ a:hover {
 }
 
 .chapter-nav__btn--prev {
-  flex-direction: row;
+  /* Markup is label-then-chevron; show the chevron on the leading edge */
+  flex-direction: row-reverse;
 }
 
 .chapter-nav__btn--next {
@@ -1717,6 +1773,10 @@ a:hover {
     font-size: 0.875rem;
     color: var(--brand-cream);
   }
+  button.nav__chapter-label {
+    font-size: 0.875rem;
+    color: var(--brand-cream);
+  }
   .nav__chapter-label-long { display: none; }
   .nav__chapter-label-short { display: inline; }
   .nav__actions { gap: 0; }
@@ -1766,6 +1826,308 @@ a:hover {
 
   .prose h2 { page-break-after: avoid; }
   .prose p  { orphans: 3; widows: 3; }
+}
+
+/* ============================================================
+   End-of-Chapter Card
+   ============================================================ */
+.chapter-end {
+  margin-top: var(--space-3xl);
+  padding: var(--space-2xl) 0 var(--space-lg);
+  text-align: center;
+  font-family: var(--font-ui);
+  border-top: 1px solid var(--border);
+}
+
+.chapter-end__seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-md);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+  transition: all var(--transition-slow);
+}
+
+.chapter-end__seal svg {
+  width: 22px;
+  height: 22px;
+}
+
+.chapter-end__seal.is-read {
+  color: var(--brand-navy);
+  background: linear-gradient(135deg, var(--brand-cyan), var(--brand-gold));
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(61, 158, 216, 0.25);
+}
+
+.chapter-end__kicker {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--highlight);
+}
+
+.chapter-end__title {
+  margin: var(--space-xs) auto 0;
+  max-width: 26ch;
+  font-family: var(--font-body);
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+  text-wrap: balance;
+}
+
+.chapter-end__note {
+  max-width: 40ch;
+  margin: var(--space-sm) auto 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.chapter-end__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  max-width: 320px;
+  margin: var(--space-lg) auto var(--space-xl);
+}
+
+.chapter-end__bar {
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.chapter-end__bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--brand-blue), var(--brand-gold));
+  transform-origin: left center;
+  transition: transform var(--transition-slow);
+}
+
+.chapter-end__count {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chapter-end__next {
+  position: relative;
+  display: grid;
+  gap: 0.2rem;
+  padding: var(--space-lg) calc(var(--space-lg) + 32px) var(--space-lg) var(--space-lg);
+  text-align: left;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.chapter-end__next:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.chapter-end__next:focus-visible,
+.chapter-end__btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.chapter-end__next-kicker {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.chapter-end__next-title {
+  margin-top: 0.15rem;
+  font-family: var(--font-body);
+  font-size: 1.1875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.chapter-end__next-sub {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.chapter-end__next-meta {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.chapter-end__next-arrow {
+  position: absolute;
+  right: var(--space-lg);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: var(--accent);
+  transition: transform var(--transition-fast);
+}
+
+.chapter-end__next:hover .chapter-end__next-arrow {
+  transform: translate(3px, -50%);
+}
+
+.chapter-end__next-arrow svg {
+  width: 22px;
+  height: 22px;
+}
+
+.chapter-end__actions {
+  display: flex;
+  justify-content: center;
+}
+
+.chapter-end__btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 1.75rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--brand-navy);
+  background: var(--brand-gold);
+  border-radius: 100px;
+}
+
+.chapter-end__btn:hover {
+  color: var(--brand-navy);
+  background: #FFD76A;
+}
+
+/* Room under the last row so the floating bookmark button never covers it */
+.is-chapter .chapter-view {
+  padding-bottom: calc(var(--space-3xl) + 64px);
+}
+
+/* The card carries "next"; the row below keeps Previous and Contents */
+.chapter-end ~ .chapter-nav {
+  margin-top: var(--space-lg);
+}
+
+.chapter-end ~ .chapter-nav .chapter-nav__btn--next {
+  display: none;
+}
+
+@media print {
+  .chapter-end { display: none; }
+}
+
+/* ============================================================
+   Sections sheet — reuses the reader-settings sheet/popover shell
+   ============================================================ */
+.sections-sheet__kicker {
+  font: 600 0.6875rem var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.15rem;
+}
+
+.sections-sheet .reader-settings__head {
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.sections-sheet .reader-settings__title {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+
+.sections-sheet__list {
+  list-style: none;
+  margin: var(--space-xs) 0 0;
+}
+
+.sections-sheet__link {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+  padding: 0.75rem var(--space-sm) 0.75rem var(--space-md);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.sections-sheet__link:hover {
+  color: var(--text-primary);
+  background: var(--accent-faint);
+}
+
+.sections-sheet__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.sections-sheet__title {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.sections-sheet__mins {
+  flex-shrink: 0;
+  font: 0.75rem var(--font-ui);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sections-sheet__link.is-current {
+  background: linear-gradient(90deg, var(--accent-faint), transparent);
+}
+
+.sections-sheet__link.is-current::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6rem;
+  bottom: 0.6rem;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(var(--brand-blue), var(--brand-gold));
+}
+
+.sections-sheet__link.is-current .sections-sheet__title {
+  font-weight: 600;
+}
+
+@media (min-width: 700px) {
+  /* Drop down from the chapter label, centred under the nav */
+  .reader-settings.sections-sheet {
+    inset: calc(var(--nav-height) + env(safe-area-inset-top) + var(--space-sm)) 0 auto 0;
+    margin: 0 auto;
+    width: 420px;
+  }
 }
 
 /* ============================================================

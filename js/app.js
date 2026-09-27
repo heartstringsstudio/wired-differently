@@ -24,34 +24,36 @@ const LS = {
   IMMERSIVE_HINT:'wired_immersiveHint',
 };
 
+/* mins: reading time at ReadingTime.WPM with form text excluded — the
+   same rule ReadingTime applies live. Recompute if chapter text changes. */
 const CHAPTERS = [
-  { id: 'ch01', num: 1,  title: 'Introduction',                     subtitle: 'What It Feels Like to Be You',                                              part: 1 },
-  { id: 'ch02', num: 2,  title: 'What ADHD Actually Is',            subtitle: 'Not a Focus Problem. Not a Willpower Problem.',                             part: 1 },
-  { id: 'ch03', num: 3,  title: 'What High IQ + ADHD Actually Means', subtitle: 'Intelligence Doesn\'t Cancel ADHD. It Disguises It.',                    part: 1 },
-  { id: 'ch04', num: 4,  title: 'Twice-Exceptionality',             subtitle: 'When "Gifted" and "Struggling" Live in the Same Brain',                     part: 1 },
-  { id: 'ch05', num: 5,  title: 'Common Signs and Patterns',        subtitle: 'The Specific Ways This Profile Shows Up in Real Life',                      part: 1 },
-  { id: 'ch06', num: 6,  title: 'Strengths',                        subtitle: 'What\'s Actually There — Without the Mythology',                            part: 1 },
-  { id: 'ch07', num: 7,  title: 'Challenges',                       subtitle: 'The Real Costs — Named Clearly, Without Flinching',                         part: 1 },
-  { id: 'ch08', num: 8,  title: 'Why High IQ Can Delay Diagnosis',  subtitle: 'The Smarter You Are, The Longer It Can Take',                               part: 2 },
-  { id: 'ch09', num: 9,  title: 'Diagnosis and Professional Evaluation', subtitle: 'What a Good Evaluation Actually Looks Like',                           part: 2 },
-  { id: 'ch10', num: 10, title: 'Treatment Options',                subtitle: 'What Actually Works, and What the Evidence Says',                           part: 2 },
-  { id: 'ch11', num: 11, title: 'The High-IQ ADHD Operating System', subtitle: 'A Working Model of Your Brain — Built for Actually Using It',             part: 3 },
-  { id: 'ch12', num: 12, title: 'Daily Life Strategies',            subtitle: 'Practical Tools for a Brain That Doesn\'t Run on Willpower',               part: 4 },
-  { id: 'ch13', num: 13, title: 'Productivity Strategies',          subtitle: 'Building Systems That Engage Rather Than Demand',                           part: 4 },
-  { id: 'ch14', num: 14, title: 'Emotional Regulation',             subtitle: 'Feeling Everything at Full Volume — and Learning to Work With It',          part: 4 },
-  { id: 'ch15', num: 15, title: 'Relationships',                    subtitle: 'How ADHD Affects the People You Love — and What Actually Helps',            part: 4 },
-  { id: 'ch16', num: 16, title: 'Work and Career',                  subtitle: 'Finding Where You Thrive, Managing Where You Don\'t',                       part: 4 },
-  { id: 'ch17', num: 17, title: 'Learning and Education',           subtitle: 'How the Gifted ADHD Brain Actually Learns',                                 part: 4 },
-  { id: 'ch18', num: 18, title: 'Creativity and Entrepreneurship',  subtitle: 'The Engine, the Risks, and Building Something Sustainable',                 part: 4 },
-  { id: 'ch19', num: 19, title: 'Burnout and Recovery',             subtitle: 'When the Compensation System Finally Runs Out',                             part: 5 },
-  { id: 'ch20', num: 20, title: 'Health Habits',                    subtitle: 'The Physical Infrastructure of a Functioning ADHD Brain',                   part: 5 },
-  { id: 'ch21', num: 21, title: 'Myths and Misunderstandings',      subtitle: 'The False Beliefs That Have Done the Most Damage',                          part: 6 },
-  { id: 'ch22', num: 22, title: 'Self-Assessment Reflection Questions', subtitle: 'Not a Test — A Conversation With Yourself',                            part: 7 },
-  { id: 'ch23', num: 23, title: 'Practical Worksheets',             subtitle: 'Tools You Can Actually Use',                                                part: 7 },
-  { id: 'ch24', num: 24, title: 'Scripts',                          subtitle: 'What to Say When You Don\'t Know What to Say',                             part: 7 },
-  { id: 'ch25', num: 25, title: 'The 30-Day Action Plan',           subtitle: 'A Structured First Month',                                                  part: 7 },
-  { id: 'ch26', num: 26, title: 'Resources',                        subtitle: 'Going Further',                                                             part: 8 },
-  { id: 'ch27', num: 27, title: 'Final Encouragement',              subtitle: 'A Letter to Close',                                                         part: 9 },
+  { id: 'ch01', num: 1,  title: 'Introduction',                     subtitle: 'What It Feels Like to Be You',                                              mins:  4, part: 1 },
+  { id: 'ch02', num: 2,  title: 'What ADHD Actually Is',            subtitle: 'Not a Focus Problem. Not a Willpower Problem.',                             mins:  9, part: 1 },
+  { id: 'ch03', num: 3,  title: 'What High IQ + ADHD Actually Means', subtitle: 'Intelligence Doesn\'t Cancel ADHD. It Disguises It.',                    mins: 10, part: 1 },
+  { id: 'ch04', num: 4,  title: 'Twice-Exceptionality',             subtitle: 'When "Gifted" and "Struggling" Live in the Same Brain',                     mins: 11, part: 1 },
+  { id: 'ch05', num: 5,  title: 'Common Signs and Patterns',        subtitle: 'The Specific Ways This Profile Shows Up in Real Life',                      mins: 15, part: 1 },
+  { id: 'ch06', num: 6,  title: 'Strengths',                        subtitle: 'What\'s Actually There — Without the Mythology',                            mins: 11, part: 1 },
+  { id: 'ch07', num: 7,  title: 'Challenges',                       subtitle: 'The Real Costs — Named Clearly, Without Flinching',                         mins: 14, part: 1 },
+  { id: 'ch08', num: 8,  title: 'Why High IQ Can Delay Diagnosis',  subtitle: 'The Smarter You Are, The Longer It Can Take',                               mins: 14, part: 2 },
+  { id: 'ch09', num: 9,  title: 'Diagnosis and Professional Evaluation', subtitle: 'What a Good Evaluation Actually Looks Like',                           mins: 14, part: 2 },
+  { id: 'ch10', num: 10, title: 'Treatment Options',                subtitle: 'What Actually Works, and What the Evidence Says',                           mins: 17, part: 2 },
+  { id: 'ch11', num: 11, title: 'The High-IQ ADHD Operating System', subtitle: 'A Working Model of Your Brain — Built for Actually Using It',             mins: 17, part: 3 },
+  { id: 'ch12', num: 12, title: 'Daily Life Strategies',            subtitle: 'Practical Tools for a Brain That Doesn\'t Run on Willpower',               mins: 20, part: 4 },
+  { id: 'ch13', num: 13, title: 'Productivity Strategies',          subtitle: 'Building Systems That Engage Rather Than Demand',                           mins: 18, part: 4 },
+  { id: 'ch14', num: 14, title: 'Emotional Regulation',             subtitle: 'Feeling Everything at Full Volume — and Learning to Work With It',          mins: 20, part: 4 },
+  { id: 'ch15', num: 15, title: 'Relationships',                    subtitle: 'How ADHD Affects the People You Love — and What Actually Helps',            mins: 18, part: 4 },
+  { id: 'ch16', num: 16, title: 'Work and Career',                  subtitle: 'Finding Where You Thrive, Managing Where You Don\'t',                       mins: 19, part: 4 },
+  { id: 'ch17', num: 17, title: 'Learning and Education',           subtitle: 'How the Gifted ADHD Brain Actually Learns',                                 mins: 20, part: 4 },
+  { id: 'ch18', num: 18, title: 'Creativity and Entrepreneurship',  subtitle: 'The Engine, the Risks, and Building Something Sustainable',                 mins: 21, part: 4 },
+  { id: 'ch19', num: 19, title: 'Burnout and Recovery',             subtitle: 'When the Compensation System Finally Runs Out',                             mins: 21, part: 5 },
+  { id: 'ch20', num: 20, title: 'Health Habits',                    subtitle: 'The Physical Infrastructure of a Functioning ADHD Brain',                   mins: 23, part: 5 },
+  { id: 'ch21', num: 21, title: 'Myths and Misunderstandings',      subtitle: 'The False Beliefs That Have Done the Most Damage',                          mins: 20, part: 6 },
+  { id: 'ch22', num: 22, title: 'Self-Assessment Reflection Questions', subtitle: 'Not a Test — A Conversation With Yourself',                            mins: 16, part: 7 },
+  { id: 'ch23', num: 23, title: 'Practical Worksheets',             subtitle: 'Tools You Can Actually Use',                                                mins: 13, part: 7 },
+  { id: 'ch24', num: 24, title: 'Scripts',                          subtitle: 'What to Say When You Don\'t Know What to Say',                             mins: 22, part: 7 },
+  { id: 'ch25', num: 25, title: 'The 30-Day Action Plan',           subtitle: 'A Structured First Month',                                                  mins: 19, part: 7 },
+  { id: 'ch26', num: 26, title: 'Resources',                        subtitle: 'Going Further',                                                             mins: 21, part: 8 },
+  { id: 'ch27', num: 27, title: 'Final Encouragement',              subtitle: 'A Letter to Close',                                                         mins: 10, part: 9 },
 ];
 
 const PARTS = [
@@ -383,6 +385,7 @@ const AutoRead = {
       if (scrolled / total > 0.8) {
         marked = true;
         Progress.markRead(chId);
+        document.dispatchEvent(new CustomEvent('wired:read', { detail: chId }));
         // Update checkmark in any TOC links visible
         document.querySelectorAll(`[data-ch="${chId}"]`).forEach(el => {
           el.classList.add('is-read');
@@ -1165,6 +1168,235 @@ const FindInChapter = {
 };
 
 /* ============================================================
+   Sections — "In this chapter"
+   Gives every chapter heading a stable id (so #section links work),
+   and turns the nav's chapter label into a button that opens a sheet
+   listing the sections, each with its reading time and a marker on
+   the one being read.
+   ============================================================ */
+const Sections = {
+  items: [],
+  dialog: null,
+
+  // Runs before scroll restore; returns true when a #section link
+  // decided where the page lands
+  prepare() {
+    const content = document.getElementById('chapter-content');
+    if (!content) return false;
+    const used = new Set();
+    this.items = Array.from(content.querySelectorAll('h2')).map(h => {
+      if (!h.id) {
+        const base = h.textContent.toLowerCase()
+          .replace(/[’']/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'section';
+        let id = base;
+        for (let n = 2; used.has(id) || document.getElementById(id); n++) id = `${base}-${n}`;
+        h.id = id;
+      }
+      used.add(h.id);
+      return { el: h, id: h.id, title: h.textContent.trim() };
+    });
+    this.measure(content);
+
+    const target = decodeURIComponent(window.location.hash.slice(1));
+    const hit = target && !target.startsWith('find=') && this.items.find(s => s.id === target);
+    if (!hit) return false;
+    const land = () => requestAnimationFrame(() => this.scrollTo(hit, false));
+    if (document.fonts?.ready) document.fonts.ready.then(land); else land();
+    return true;
+  },
+
+  // Words between consecutive headings -> minutes per section
+  measure(content) {
+    let current = null;
+    const opening = { words: 0 };
+    const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => n.parentElement.closest(SearchText.SKIP)
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+    });
+    const byHeading = new Map(this.items.map(s => [s.el, s]));
+    this.items.forEach(s => { s.words = 0; });
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const heading = node.parentElement.closest('h2');
+      if (heading && byHeading.has(heading)) { current = byHeading.get(heading); continue; }
+      // A text node belongs to the last heading that precedes it
+      for (const s of this.items) {
+        if (s.el.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING) current = s;
+        else break;
+      }
+      (current || opening).words += (node.nodeValue.match(/\S+/g) || []).length;
+    }
+    this.openingWords = opening.words;
+  },
+
+  init(ch) {
+    this.ch = ch;
+    this.trigger = document.getElementById('sections-btn');
+    if (!this.trigger) return;
+    if (!this.items.length) { this.trigger.disabled = true; return; }
+    const chevron = document.createElement('span');
+    chevron.className = 'nav__chapter-chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    chevron.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    this.trigger.querySelector('.nav__chapter-line')?.append(chevron);
+    this.trigger.addEventListener('click', () => this.open());
+  },
+
+  minutes(words) {
+    return `${Math.max(1, Math.round(words / ReadingTime.WPM))} min`;
+  },
+
+  build() {
+    const d = document.createElement('dialog');
+    d.className = 'reader-settings sections-sheet';
+    d.setAttribute('aria-labelledby', 'sections-title');
+    const row = (label, mins, attrs) => `
+      <li><a class="sections-sheet__link" ${attrs}>
+        <span class="sections-sheet__title">${BookSearch.escape(label)}</span>
+        <span class="sections-sheet__mins">${mins}</span>
+      </a></li>`;
+    d.innerHTML = `
+      <div class="reader-settings__inner">
+        <div class="reader-settings__grip" aria-hidden="true"></div>
+        <header class="reader-settings__head">
+          <div>
+            <p class="sections-sheet__kicker">Chapter ${this.ch.num} · In this chapter</p>
+            <h2 class="reader-settings__title" id="sections-title">${BookSearch.escape(this.ch.title)}</h2>
+          </div>
+          <button type="button" class="reader-settings__done" data-close>Done</button>
+        </header>
+        <ol class="sections-sheet__list">
+          ${row('Chapter opening', this.minutes(this.openingWords), 'href="#" data-section="__top"')}
+          ${this.items.map(s => row(s.title, this.minutes(s.words), `href="#${s.id}" data-section="${s.id}"`)).join('')}
+        </ol>
+      </div>`;
+    d.addEventListener('click', e => {
+      const link = e.target.closest('[data-section]');
+      if (link) {
+        e.preventDefault();
+        const target = this.items.find(s => s.id === link.dataset.section) || null;
+        this.close();
+        this.scrollTo(target, true);
+        return;
+      }
+      if (e.target.closest('[data-close]') || e.target === d) this.close();
+    });
+    d.addEventListener('close', () => this.trigger?.setAttribute('aria-expanded', 'false'));
+    document.body.appendChild(d);
+    this.dialog = d;
+  },
+
+  // The section being read: the last heading above the top third
+  currentIndex() {
+    const line = window.innerHeight / 3;
+    let idx = -1;
+    this.items.forEach((s, i) => { if (s.el.getBoundingClientRect().top <= line) idx = i; });
+    return idx;
+  },
+
+  open() {
+    if (!this.items.length) return;
+    if (!this.dialog) this.build();
+    const idx = this.currentIndex();
+    this.dialog.querySelectorAll('.sections-sheet__link').forEach((a, i) => {
+      const here = i === idx + 1; // row 0 is the chapter opening
+      a.classList.toggle('is-current', here);
+      if (here) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
+    });
+    Immersive.show();
+    this.trigger?.setAttribute('aria-expanded', 'true');
+    if (typeof this.dialog.showModal === 'function') this.dialog.showModal();
+    else this.dialog.setAttribute('open', '');
+    this.dialog.querySelector('.is-current')?.scrollIntoView({ block: 'nearest' });
+  },
+
+  close() {
+    if (!this.dialog) return;
+    if (typeof this.dialog.close === 'function') this.dialog.close();
+    else { this.dialog.removeAttribute('open'); this.dialog.dispatchEvent(new Event('close')); }
+  },
+
+  isOpen() { return Boolean(this.dialog?.open); },
+
+  scrollTo(section, smooth) {
+    const root = document.documentElement;
+    if (!smooth) root.style.scrollBehavior = 'auto';
+    if (section) section.el.scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' });
+    else window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+    if (!smooth) root.style.scrollBehavior = '';
+    history.replaceState(history.state, '',
+      window.location.pathname + window.location.search + (section ? `#${section.id}` : ''));
+  }
+};
+
+/* ============================================================
+   End-of-Chapter Card — "Chapter complete", book progress, and the
+   next chapter with its reading time. Replaces the bare Next button;
+   the last chapter gets a closing card instead.
+   ============================================================ */
+const ChapterEnd = {
+  init(ch) {
+    const nav = document.querySelector('.chapter-nav');
+    if (!nav) return;
+    this.ch = ch;
+    this.card = document.createElement('section');
+    this.card.className = 'chapter-end';
+    this.card.setAttribute('aria-labelledby', 'chapter-end-title');
+    nav.before(this.card);
+    this.render();
+    document.addEventListener('wired:read', () => this.render());
+  },
+
+  render() {
+    const { ch } = this;
+    const read = Progress.isRead(ch.id);
+    const count = Progress.getCount();
+    const total = CHAPTERS.length;
+    const next = Nav.getChapterByNum(ch.num + 1);
+    const esc = s => BookSearch.escape(s);
+    const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    const arrow = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
+    const progress = `
+      <div class="chapter-end__progress">
+        <div class="chapter-end__bar" role="progressbar" aria-label="Book progress"
+             aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${count}">
+          <span style="transform:scaleX(${count / total})"></span>
+        </div>
+        <span class="chapter-end__count">${count} of ${total} chapters read</span>
+      </div>`;
+
+    if (!next) {
+      this.card.classList.add('chapter-end--finale');
+      this.card.innerHTML = `
+        <div class="chapter-end__seal${read ? ' is-read' : ''}">${check}</div>
+        <p class="chapter-end__kicker">The end</p>
+        <h2 class="chapter-end__title" id="chapter-end-title">You’ve reached the end of <em>Wired Differently</em></h2>
+        <p class="chapter-end__note">Come back to any chapter whenever you need it. The worksheets and scripts are always here.</p>
+        ${progress}
+        <div class="chapter-end__actions">
+          <a class="chapter-end__btn" href="${Paths.toc()}">Back to Contents</a>
+        </div>`;
+      return;
+    }
+
+    const nextPart = PARTS.find(p => p.chapters[0] === next.num && p.num !== ch.part);
+    this.card.innerHTML = `
+      <div class="chapter-end__seal${read ? ' is-read' : ''}">${check}</div>
+      <p class="chapter-end__kicker">${read ? 'Chapter complete' : `End of Chapter ${ch.num}`}</p>
+      <h2 class="chapter-end__title" id="chapter-end-title">${esc(ch.title)}</h2>
+      ${progress}
+      <a class="chapter-end__next" href="${Paths.chapter(next.id)}">
+        <span class="chapter-end__next-kicker">Up next${nextPart ? ` · ${esc(nextPart.num === 9 ? 'Closing' : `${nextPart.label} begins`)}` : ''}</span>
+        <span class="chapter-end__next-title">${esc(next.title)}</span>
+        <span class="chapter-end__next-sub">${esc(next.subtitle)}</span>
+        <span class="chapter-end__next-meta">Chapter ${next.num} · ${next.mins} min read</span>
+        <span class="chapter-end__next-arrow">${arrow}</span>
+      </a>`;
+  }
+};
+
+/* ============================================================
    Reading Time — "18 min read" in the chapter header and a live
    "12 min left" under the chapter label in the nav
    ============================================================ */
@@ -1261,7 +1493,7 @@ const KeyboardNav = {
     document.addEventListener('keydown', e => {
       // Don't fire in inputs, or when a modifier is held
       if (e.target.matches('input, textarea, select')) return;
-      if (ReaderSettings.isOpen()) return;
+      if (ReaderSettings.isOpen() || Sections.isOpen()) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // Left/Right turn pages; Up/Down are left alone for normal scrolling
       if (e.key === 'ArrowLeft') {
@@ -1274,6 +1506,7 @@ const KeyboardNav = {
       }
       if (e.key === 't' || e.key === 'T') Nav.goToTOC();
       if (e.key === 'a' || e.key === 'A') ReaderSettings.open();
+      if (e.key === 's' || e.key === 'S') Sections.open();
       if (e.key === '+' || e.key === '=') Prefs.step('fontSize', 1);
       if (e.key === '-' || e.key === '_') Prefs.step('fontSize', -1);
       if (e.key === 'b' || e.key === 'B') document.getElementById('bookmark-btn')?.click();
@@ -1311,8 +1544,9 @@ const App = {
     ReadingProgressBar.init();
     ReadingProgressBar.show();
     WorksheetPersist.init(chId);
+    const landedOnSection = Sections.prepare();
     const landedOnSearch = FindInChapter.init();
-    ScrollPersist.init(chId, { restore: !landedOnSearch });
+    ScrollPersist.init(chId, { restore: !landedOnSearch && !landedOnSection });
     AutoRead.init(chId);
     BookmarkUI.init(chId);
 
@@ -1321,20 +1555,33 @@ const App = {
       KeyboardNav.init(ch.num);
       TouchNav.init(ch.num);
       Progress.saveLastChapter(chId);
-      // Update nav label with position context ("Ch. 5 of 27 — Title")
-      const label = document.querySelector('.nav__chapter-label');
-      // Both forms are rendered; CSS picks one per screen width so the
-      // label stays correct across rotation and window resizes
-      if (label) {
+      // Nav label with position context ("Ch. 5 of 27 — Title"). It becomes
+      // the button for the chapter's section list. Both text forms are
+      // rendered; CSS picks one per screen width so rotation stays correct.
+      const placeholder = document.querySelector('.nav__chapter-label');
+      if (placeholder) {
+        const label = document.createElement('button');
+        label.type = 'button';
+        label.className = 'nav__chapter-label';
+        label.id = 'sections-btn';
+        label.setAttribute('aria-haspopup', 'dialog');
+        label.setAttribute('aria-expanded', 'false');
+        label.setAttribute('aria-label', `Sections in Chapter ${ch.num}: ${ch.title}`);
         const long = document.createElement('span');
         long.className = 'nav__chapter-label-long';
         long.textContent = `Ch. ${ch.num} of ${CHAPTERS.length} — ${ch.title}`;
         const short = document.createElement('span');
         short.className = 'nav__chapter-label-short';
         short.textContent = `Ch. ${ch.num} · ${ch.title}`;
-        label.replaceChildren(long, short);
+        const line = document.createElement('span');
+        line.className = 'nav__chapter-line';
+        line.append(long, short);
+        label.append(line);
+        placeholder.replaceWith(label);
       }
       ReadingTime.init();
+      Sections.init(ch);
+      ChapterEnd.init(ch);
       document.body.classList.add('is-chapter');
       Immersive.init();
     }
