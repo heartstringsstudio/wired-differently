@@ -1579,6 +1579,7 @@ const App = {
         label.append(line);
         placeholder.replaceWith(label);
       }
+      document.querySelector('.chapter-header')?.setAttribute('data-num', String(ch.num));
       ReadingTime.init();
       Sections.init(ch);
       ChapterEnd.init(ch);

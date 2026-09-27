@@ -132,7 +132,7 @@
   --bg-primary:      #081321;
   --bg-secondary:    #0E1D2D;
   --bg-elevated:     #13263A;
-  --text-primary:    #F5F3EC;
+  --text-primary:    #E4E0D6;  /* softened from pure cream to cut glare */
   --text-secondary:  #C4CED7;
   --text-muted:      #9EACB8;
   --accent:          #62C8F2;
@@ -1077,67 +1077,89 @@ button.nav__chapter-label:disabled {
   transition: max-width var(--transition-med), padding var(--transition-med);
 }
 
-/* Chapter header */
+/* Chapter header — a centred book-style opener:
+   numeral, part, title, subtitle, ornament, then the quiet meta line */
 .chapter-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   margin-bottom: var(--space-3xl);
-  padding-bottom: var(--space-xl);
-  border-bottom: 0;
-  position: relative;
+  padding-top: var(--space-lg);
 }
 
+/* Large chapter numeral; the number comes from data-num set by app.js */
+.chapter-header[data-num]::before {
+  content: attr(data-num);
+  order: 0;
+  font-family: 'Lora', Georgia, serif;
+  font-size: clamp(3.5rem, 11vw, 5rem);
+  font-weight: 400;
+  line-height: 1;
+  color: var(--highlight);
+  margin-bottom: var(--space-md);
+  font-variant-numeric: proportional-nums;
+}
+
+/* Three-dot ornament, shared visual language with section breaks */
 .chapter-header::after {
   content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: min(180px, 42%);
-  height: 3px;
-  background: linear-gradient(90deg, var(--brand-blue), var(--brand-gold));
-  border-radius: 3px;
+  order: 4;
+  width: 38px;
+  height: 7px;
+  margin: var(--space-lg) 0 var(--space-md);
+  background: radial-gradient(circle, var(--brand-gold) 2px, transparent 2.5px) center / 13px 7px repeat-x;
 }
 
 .chapter-header__part {
+  order: 1;
   font-family: var(--font-ui);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.10em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--brand-blue);
-  margin-bottom: var(--space-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-md);
+  text-wrap: balance;
 }
 
 .chapter-header__number {
+  order: 5;
   font-family: var(--font-ui);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.10em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--highlight);
-  margin-bottom: var(--space-md);
+  color: var(--text-muted);
 }
 
 .chapter-header__of,
 .chapter-header__time {
   font-weight: 400;
-  opacity: 0.65;
+  opacity: 0.8;
 }
 
 .chapter-header__title {
+  order: 2;
   font-family: var(--font-body);
-  font-size: clamp(1.6rem, 4vw, 2.25rem);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
   margin-bottom: var(--space-sm);
+  text-wrap: balance;
 }
 
 .chapter-header__subtitle {
+  order: 3;
+  max-width: 34ch;
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 1.0625rem;
   color: var(--text-secondary);
   line-height: 1.5;
   font-style: italic;
+  text-wrap: balance;
 }
 
 /* Reading progress bar (thin line at top of chapter) */
@@ -1166,6 +1188,53 @@ button.nav__chapter-label:disabled {
    ============================================================ */
 .prose {
   max-width: var(--measure);
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures contextual;
+  hanging-punctuation: first allow-end;  /* Safari; ignored elsewhere */
+}
+
+.prose p,
+.prose li {
+  text-wrap: pretty;  /* avoids one-word last lines */
+}
+
+/* Narrow columns: hyphenate so the right edge stays calm */
+@media (max-width: 600px) {
+  .prose p,
+  .prose li {
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    hyphenate-limit-chars: 7 3 3;
+  }
+}
+
+/* Chapter opening: a drop cap and a first line set in spaced capitals */
+.prose > p:first-of-type::first-line {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.86em;
+}
+
+.prose > p:first-of-type::first-letter {
+  float: left;
+  /* Always the serif: a Lora initial reads as a book at every typeface */
+  font-family: 'Lora', Georgia, serif;
+  font-size: 3.4em;
+  font-weight: 500;
+  line-height: 0.82;
+  margin: 0.08em 0.1em 0 0;
+  color: var(--highlight);
+}
+
+@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+  .prose > p:first-of-type::first-letter {
+    float: none;
+    font-size: 1em;
+    line-height: inherit;
+    margin: 0 0.12em 0 0;
+    -webkit-initial-letter: 3;
+    initial-letter: 3;
+  }
 }
 
 .prose p {
@@ -1181,6 +1250,7 @@ button.nav__chapter-label:disabled {
 
 .prose h2 {
   scroll-margin-top: calc(var(--nav-height) + env(safe-area-inset-top) + var(--space-lg));
+  text-wrap: balance;
   font-family: var(--font-body);
   font-size: 1.35rem;
   font-weight: 700;
@@ -1192,22 +1262,22 @@ button.nav__chapter-label:disabled {
 }
 
 .prose h3 {
-  font-family: var(--font-ui);
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
   font-weight: 600;
-  color: var(--accent);
+  line-height: 1.35;
+  color: var(--text-primary);
   margin-top: 2em;
   margin-bottom: 0.5em;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  font-size: 0.8125rem;
+  text-wrap: balance;
 }
 
 .prose h4 {
   font-family: var(--font-body);
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-wrap: balance;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   font-style: italic;
@@ -1223,17 +1293,40 @@ button.nav__chapter-label:disabled {
   line-height: calc(var(--line-height) - 0.1);
 }
 
+.prose li::marker {
+  color: var(--text-muted);
+}
+
+.prose ol > li::marker {
+  font-family: var(--font-ui);
+  font-size: 0.875em;
+  font-variant-numeric: tabular-nums;
+}
+
+.prose a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
 .prose blockquote {
-  border-left: 3px solid var(--brand-blue);
-  padding: var(--space-md) var(--space-xl);
-  margin: var(--space-xl) 0;
-  background: linear-gradient(90deg, var(--accent-faint), transparent);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border-left: 2px solid var(--highlight);
+  padding: 0.25em 0 0.25em 1.25em;
+  margin: var(--space-xl) 0 var(--space-xl) 0.25em;
 }
 
 .prose blockquote p {
   font-style: italic;
+  font-size: 1.0625em;
   color: var(--text-secondary);
+}
+
+.prose blockquote p:last-child {
   margin-bottom: 0;
 }
 
@@ -1246,12 +1339,14 @@ button.nav__chapter-label:disabled {
   font-style: italic;
 }
 
-/* Section dividers within chapters */
+/* Section breaks: a centred three-dot ornament instead of a rule */
 .prose hr {
   border: none;
-  height: 1px;
-  background: var(--border);
-  margin: var(--space-2xl) 0;
+  width: 38px;
+  height: 7px;
+  margin: 2.75em auto;
+  background: radial-gradient(circle, var(--text-muted) 1.75px, transparent 2.25px) center / 13px 7px repeat-x;
+  opacity: 0.8;
 }
 
 /* Callout / highlight box */
