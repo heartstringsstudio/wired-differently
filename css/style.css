@@ -347,10 +347,28 @@ a:hover {
 }
 
 .is-chapter .nav__chapter-label {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.25;
+}
+
+.nav__chapter-label > span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav__chapter-label-short { display: none; }
+
+.nav__chapter-meta {
+  margin-top: 1px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: rgba(247, 243, 232, 0.55);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ============================================================
    Page Wrapper
@@ -681,27 +699,76 @@ a:hover {
   margin-top: var(--space-sm);
 }
 
-.search-results li + li {
+.search-results > li + li {
   border-top: 1px solid var(--border);
 }
 
-.search-results a {
+.search-chapter {
+  padding: 0.75rem 0;
+}
+
+.search-chapter__head {
   display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.875rem 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 0.25rem 0;
   font-family: var(--font-ui);
 }
 
-.search-results strong {
+.search-chapter__head strong {
   font-size: 0.875rem;
   color: var(--text-primary);
 }
 
-.search-results span {
-  font-size: 0.75rem;
-  line-height: 1.45;
+.search-chapter__count {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
+}
+
+.search-hits {
+  list-style: none;
+  margin-top: 0.25rem;
+}
+
+.search-hit {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  margin: 0.125rem 0;
+  font: 0.8125rem/1.5 var(--font-ui);
+  color: var(--text-secondary);
+  border-left: 2px solid var(--border-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.search-hit:hover,
+.search-hit:focus-visible {
+  color: var(--text-primary);
+  background: var(--accent-faint);
+  border-left-color: var(--accent);
+}
+
+.search-hit mark,
+.find-hit {
+  color: inherit;
+  background: var(--highlight-faint);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--highlight-faint);
+}
+
+.search-hit mark {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.search-more {
+  display: inline-block;
+  margin: 0.25rem 0 0 0.875rem;
+  font: 600 0.75rem var(--font-ui);
 }
 
 .data-tools {
@@ -995,7 +1062,8 @@ a:hover {
   margin-bottom: var(--space-md);
 }
 
-.chapter-header__of {
+.chapter-header__of,
+.chapter-header__time {
   font-weight: 400;
   opacity: 0.65;
 }
@@ -1645,6 +1713,7 @@ a:hover {
     flex: 1;
     min-width: 0;
     max-width: none;
+    align-items: flex-start;
     font-size: 0.875rem;
     color: var(--brand-cream);
   }
@@ -1655,6 +1724,7 @@ a:hover {
 
 /* Comfortable mid-range */
 @media (min-width: 768px) {
+  .nav__chapter-label { max-width: 380px; }
   .nav {
     padding: env(safe-area-inset-top) max(var(--space-xl), env(safe-area-inset-right)) 0 max(var(--space-xl), env(safe-area-inset-left));
   }
@@ -1696,6 +1766,100 @@ a:hover {
 
   .prose h2 { page-break-after: avoid; }
   .prose p  { orphans: 3; widows: 3; }
+}
+
+/* ============================================================
+   Find in Chapter — highlighted matches and the step-through bar
+   ============================================================ */
+.find-hit.is-current {
+  background: var(--brand-gold);
+  color: #1A1204;
+  box-shadow: 0 0 0 2px var(--brand-gold);
+}
+
+.find-bar {
+  position: fixed;
+  /* Centred without transform, which the entrance animation owns */
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: max-content;
+  bottom: max(var(--space-lg), calc(env(safe-area-inset-bottom) + var(--space-sm)));
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  max-width: calc(100vw - 2 * var(--space-md));
+  padding: 0.25rem 0.25rem 0.25rem 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  color: var(--brand-cream);
+  background: rgba(6, 16, 31, 0.97);
+  border: 1px solid rgba(98, 200, 242, 0.28);
+  border-radius: 100px;
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-overlay);
+  animation: fadeIn 250ms ease both;
+}
+
+.find-bar__term {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--brand-gold);
+}
+
+.find-bar__count {
+  flex-shrink: 0;
+  margin: 0 0.375rem 0 0.5rem;
+  color: rgba(247, 243, 232, 0.7);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.find-bar__btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-cream);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.find-bar__btn:hover {
+  background: rgba(98, 200, 242, 0.16);
+  color: var(--brand-cyan);
+}
+
+.find-bar__btn:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: -2px;
+}
+
+.find-bar__btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* The find bar owns the bottom edge while it's open */
+.is-finding .bookmark-btn {
+  display: none !important;
+}
+
+.is-finding .reader-hint {
+  bottom: calc(max(var(--space-lg), calc(env(safe-area-inset-bottom) + var(--space-sm))) + 60px);
+}
+
+@media print {
+  .find-bar { display: none; }
+  .find-hit { background: none; box-shadow: none; }
 }
 
 /* ============================================================

@@ -335,11 +335,11 @@ const Nav = {
 const ScrollPersist = {
   chId: null,
   saveTimer: null,
-  init(chId) {
+  init(chId, { restore = true } = {}) {
     this.chId = chId;
-    // Restore saved position
+    // Restore saved position (skipped when a search result decides where to land)
     const saved = Progress.getScroll(chId);
-    if (saved > 0) {
+    if (restore && saved > 0) {
       // Jump straight to the saved spot; the page-wide smooth scrolling
       // would otherwise animate down from the top on every open
       const restore = () => requestAnimationFrame(() => {
@@ -921,11 +921,45 @@ const TouchNav = {
 };
 
 /* ============================================================
-   TOC Search — loads the cached chapter text only when requested
+   Search Text — one matching rule shared by the TOC index and the
+   in-chapter highlighter, so "hit 3" means the same match in both.
+   Whitespace in the query matches any run of whitespace; skipped
+   elements are form controls whose text isn't reading text.
+   ============================================================ */
+const SearchText = {
+  SKIP: 'textarea, script, style, option, button, select',
+  pattern(query) {
+    const escaped = query.trim()
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\s+/g, '\\s+')
+      // Straight and curly quotes match each other (the book is set curly)
+      .replace(/['‘’]/g, "['‘’]")
+      .replace(/["“”]/g, '["“”]');
+    return new RegExp(escaped, 'gi');
+  },
+  hits(text, query) {
+    const re = this.pattern(query);
+    const out = [];
+    let m;
+    while ((m = re.exec(text))) {
+      if (!m[0].length) { re.lastIndex += 1; continue; }
+      out.push([m.index, m.index + m[0].length]);
+    }
+    return out;
+  },
+  findLink(chId, query, hit) {
+    return `${Paths.chapter(chId)}#${new URLSearchParams({ find: query, hit: String(hit) })}`;
+  }
+};
+
+/* ============================================================
+   TOC Search — loads the cached chapter text only when requested.
+   Each result links to the exact match; the chapter highlights it.
    ============================================================ */
 const BookSearch = {
   index: null,
   timer: null,
+  SNIPPETS_PER_CHAPTER: 3,
   init() {
     this.input = document.getElementById('book-search');
     this.results = document.getElementById('search-results');
@@ -944,7 +978,9 @@ const BookSearch = {
         const response = await fetch(Paths.chapter(ch.id));
         const html = await response.text();
         const doc = new DOMParser().parseFromString(html, 'text/html');
-        return { ...ch, text: (doc.querySelector('#chapter-content')?.textContent || '').replace(/\s+/g, ' ').trim() };
+        const content = doc.querySelector('#chapter-content');
+        content?.querySelectorAll(SearchText.SKIP).forEach(el => el.remove());
+        return { ...ch, text: (content?.textContent || '').replace(/\s+/g, ' ').trim() };
       } catch {
         return { ...ch, text: '' };
       }
@@ -959,20 +995,219 @@ const BookSearch = {
       return;
     }
     const index = await this.buildIndex();
-    const needle = query.toLocaleLowerCase();
-    const matches = index.filter(ch =>
-      `${ch.title} ${ch.subtitle} ${ch.text}`.toLocaleLowerCase().includes(needle));
-    this.status.textContent = `${matches.length} chapter${matches.length === 1 ? '' : 's'} found`;
-    this.results.innerHTML = matches.slice(0, 20).map(ch => {
-      const text = ch.text;
-      const at = text.toLocaleLowerCase().indexOf(needle);
-      const start = Math.max(0, at - 70);
-      const snippet = at >= 0 ? `${start ? '…' : ''}${text.slice(start, at + query.length + 100)}…` : ch.subtitle;
-      return `<li><a href="${Paths.chapter(ch.id)}"><strong>Ch. ${ch.num}: ${this.escape(ch.title)}</strong><span>${this.escape(snippet)}</span></a></li>`;
+    if (query !== this.input.value.trim()) return; // a newer search is on its way
+    const inTitle = ch => SearchText.hits(`${ch.title} ${ch.subtitle}`, query).length > 0;
+    const matches = index
+      .map(ch => ({ ch, hits: SearchText.hits(ch.text, query) }))
+      .filter(({ ch, hits }) => hits.length || inTitle(ch));
+
+    const total = matches.reduce((n, m) => n + m.hits.length, 0);
+    this.status.textContent = matches.length
+      ? `${total} match${total === 1 ? '' : 'es'} in ${matches.length} chapter${matches.length === 1 ? '' : 's'}`
+      : 'No matches';
+
+    this.results.innerHTML = matches.map(({ ch, hits }) => {
+      const shown = hits.slice(0, this.SNIPPETS_PER_CHAPTER);
+      const more = hits.length - shown.length;
+      const snippets = shown.map((range, i) => `
+        <li><a class="search-hit" href="${SearchText.findLink(ch.id, query, i)}">${this.snippet(ch.text, range)}</a></li>`).join('');
+      return `
+      <li class="search-chapter">
+        <a class="search-chapter__head" href="${hits.length ? SearchText.findLink(ch.id, query, 0) : Paths.chapter(ch.id)}">
+          <strong>Ch. ${ch.num}: ${this.escape(ch.title)}</strong>
+          <span class="search-chapter__count">${hits.length ? `${hits.length} match${hits.length === 1 ? '' : 'es'}` : 'Title match'}</span>
+        </a>
+        ${snippets ? `<ol class="search-hits">${snippets}</ol>` : ''}
+        ${more > 0 ? `<a class="search-more" href="${SearchText.findLink(ch.id, query, shown.length)}">${more} more in this chapter →</a>` : ''}
+      </li>`;
     }).join('');
+  },
+  // ~70 characters either side of the match, with the match marked
+  snippet(text, [start, end]) {
+    const from = Math.max(0, text.lastIndexOf(' ', Math.max(0, start - 70)) + 1);
+    let to = text.indexOf(' ', Math.min(text.length, end + 90));
+    if (to === -1) to = text.length;
+    return `${from > 0 ? '…' : ''}${this.escape(text.slice(from, start))}<mark>${this.escape(text.slice(start, end))}</mark>${this.escape(text.slice(end, to))}${to < text.length ? '…' : ''}`;
   },
   escape(value) {
     return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+};
+
+/* ============================================================
+   Find in Chapter — lands on a search result.
+   Reads #find=<query>&hit=<n>, highlights every match in the chapter,
+   centres match n, and offers a small bar to step through the rest.
+   A hash (not a query string) keeps the offline cache keyed per page.
+   ============================================================ */
+const FindInChapter = {
+  groups: [],   // one array of <mark> elements per match
+  current: -1,
+  query: '',
+
+  request() {
+    const hash = window.location.hash.slice(1);
+    if (!hash.startsWith('find=')) return null;
+    const params = new URLSearchParams(hash);
+    const q = (params.get('find') || '').trim();
+    return q.length >= 2 ? { q, hit: Math.max(0, parseInt(params.get('hit'), 10) || 0) } : null;
+  },
+
+  // Returns true when it took charge of the landing position
+  init() {
+    const req = this.request();
+    if (!req) return false;
+    this.content = document.getElementById('chapter-content');
+    if (!this.content || !this.highlight(req.q)) { this.clearHash(); return false; }
+    this.query = req.q;
+    this.buildBar();
+    const land = () => requestAnimationFrame(() => this.go(Math.min(req.hit, this.groups.length - 1), false));
+    if (document.fonts?.ready) document.fonts.ready.then(land); else land();
+    return true;
+  },
+
+  highlight(query) {
+    const walker = document.createTreeWalker(this.content, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => n.parentElement.closest(SearchText.SKIP)
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+    });
+    const nodes = [];
+    let text = '';
+    while (walker.nextNode()) {
+      nodes.push({ node: walker.currentNode, start: text.length, len: walker.currentNode.nodeValue.length });
+      text += walker.currentNode.nodeValue;
+    }
+    const hits = SearchText.hits(text, query);
+    // Wrap right-to-left: splitting a text node keeps its earlier part in
+    // the original node, so offsets still to be processed stay valid
+    const groups = [];
+    for (let h = hits.length - 1; h >= 0; h--) {
+      const [s, e] = hits[h];
+      const group = [];
+      for (let i = nodes.length - 1; i >= 0; i--) {
+        const { node, start, len } = nodes[i];
+        if (start >= e || start + len <= s) continue;
+        const range = document.createRange();
+        range.setStart(node, Math.max(0, s - start));
+        range.setEnd(node, Math.min(len, e - start));
+        if (range.collapsed || !range.toString().trim()) continue;
+        const mark = document.createElement('mark');
+        mark.className = 'find-hit';
+        range.surroundContents(mark);
+        group.unshift(mark);
+      }
+      if (group.length) groups.unshift(group);
+    }
+    this.groups = groups;
+    return groups.length;
+  },
+
+  buildBar() {
+    const bar = document.createElement('div');
+    bar.className = 'find-bar';
+    bar.setAttribute('role', 'region');
+    bar.setAttribute('aria-label', 'Search results in this chapter');
+    bar.innerHTML = `
+      <span class="find-bar__term"></span>
+      <span class="find-bar__count" aria-live="polite"></span>
+      <button type="button" class="find-bar__btn" data-find="-1" aria-label="Previous match">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <button type="button" class="find-bar__btn" data-find="1" aria-label="Next match">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <button type="button" class="find-bar__btn" data-find="close" aria-label="Clear search highlights">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>`;
+    bar.querySelector('.find-bar__term').textContent = `“${this.query}”`;
+    bar.addEventListener('click', e => {
+      const btn = e.target.closest('[data-find]');
+      if (!btn) return;
+      if (btn.dataset.find === 'close') this.clear();
+      else this.go(this.current + Number(btn.dataset.find));
+    });
+    document.addEventListener('keydown', this.onKey = e => {
+      if (e.key === 'Escape' && !ReaderSettings.isOpen()) this.clear();
+    });
+    document.body.appendChild(bar);
+    document.body.classList.add('is-finding');
+    this.bar = bar;
+  },
+
+  go(i, smooth = true) {
+    const n = this.groups.length;
+    if (!n) return;
+    const next = ((i % n) + n) % n; // wrap around at either end
+    this.groups[this.current]?.forEach(m => m.classList.remove('is-current'));
+    this.current = next;
+    const group = this.groups[next];
+    group.forEach(m => m.classList.add('is-current'));
+    const root = document.documentElement;
+    if (!smooth) root.style.scrollBehavior = 'auto';
+    group[0].scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
+    if (!smooth) root.style.scrollBehavior = '';
+    this.bar.querySelector('.find-bar__count').textContent = `${next + 1} of ${n}`;
+  },
+
+  clear() {
+    this.groups.flat().forEach(mark => mark.replaceWith(...mark.childNodes));
+    this.content?.normalize();
+    this.groups = [];
+    this.bar?.remove();
+    document.removeEventListener('keydown', this.onKey);
+    document.body.classList.remove('is-finding');
+    this.clearHash();
+  },
+
+  clearHash() {
+    history.replaceState(history.state, '', window.location.pathname + window.location.search);
+  }
+};
+
+/* ============================================================
+   Reading Time — "18 min read" in the chapter header and a live
+   "12 min left" under the chapter label in the nav
+   ============================================================ */
+const ReadingTime = {
+  WPM: 230,
+  init() {
+    this.content = document.getElementById('chapter-content');
+    if (!this.content) return;
+    const clone = this.content.cloneNode(true);
+    clone.querySelectorAll(SearchText.SKIP).forEach(el => el.remove());
+    this.words = (clone.textContent.match(/\S+/g) || []).length;
+    const total = Math.max(1, Math.round(this.words / this.WPM));
+
+    const header = document.querySelector('.chapter-header__number');
+    if (header) {
+      const time = document.createElement('span');
+      time.className = 'chapter-header__time';
+      time.textContent = ` · ${total} min read`;
+      header.appendChild(time);
+    }
+
+    this.meta = document.createElement('span');
+    this.meta.className = 'nav__chapter-meta';
+    document.querySelector('.nav__chapter-label')?.appendChild(this.meta);
+
+    let ticking = false;
+    const schedule = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { this.update(); ticking = false; });
+    };
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    this.update();
+    document.fonts?.ready.then(() => this.update());
+  },
+  update() {
+    const rect = this.content.getBoundingClientRect();
+    const left = Math.min(1, Math.max(0, (rect.bottom - window.innerHeight) / rect.height));
+    const minutes = (this.words * left) / this.WPM;
+    this.meta.textContent = left === 0 ? 'End of chapter'
+      : minutes < 1 ? 'Under a minute left'
+      : `${Math.ceil(minutes)} min left`;
   }
 };
 
@@ -1075,10 +1310,11 @@ const App = {
     ReaderSettings.init();
     ReadingProgressBar.init();
     ReadingProgressBar.show();
-    ScrollPersist.init(chId);
+    WorksheetPersist.init(chId);
+    const landedOnSearch = FindInChapter.init();
+    ScrollPersist.init(chId, { restore: !landedOnSearch });
     AutoRead.init(chId);
     BookmarkUI.init(chId);
-    WorksheetPersist.init(chId);
 
     const ch = CHAPTERS.find(c => c.id === chId);
     if (ch) {
@@ -1098,6 +1334,7 @@ const App = {
         short.textContent = `Ch. ${ch.num} · ${ch.title}`;
         label.replaceChildren(long, short);
       }
+      ReadingTime.init();
       document.body.classList.add('is-chapter');
       Immersive.init();
     }
