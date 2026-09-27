@@ -5,16 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <script>
-    /* Apply saved theme + font size before first paint to prevent FOUC */
+    /* Apply saved reading settings before first paint to prevent FOUC.
+       Keep in sync with Theme and Prefs in js/app.js. */
     (function () {
       try {
         var d = document.documentElement, s = localStorage;
-        var t = s.getItem('wired_darkMode');
-        var dark = t !== null ? JSON.parse(t)
-                              : matchMedia('(prefers-color-scheme: dark)').matches;
-        d.setAttribute('data-theme', dark ? 'dark' : 'light');
-        var f = s.getItem('wired_fontSize');
-        if (f) d.setAttribute('data-font-size', JSON.parse(f));
+        var p = JSON.parse(s.getItem('wired_theme'));
+        if (!p) {
+          var t = s.getItem('wired_darkMode');
+          var dark = t !== null ? JSON.parse(t)
+                                : matchMedia('(prefers-color-scheme: dark)').matches;
+          p = dark ? 'night' : 'paper';
+        }
+        d.setAttribute('data-palette', p);
+        d.setAttribute('data-theme', p === 'night' || p === 'black' ? 'dark' : 'light');
+        ['fontSize:font-size', 'leading:leading', 'margins:margins', 'typeface:typeface']
+          .forEach(function (pair) {
+            var k = pair.split(':'), v = s.getItem('wired_' + k[0]);
+            if (v) d.setAttribute('data-' + k[1], JSON.parse(v));
+          });
       } catch (e) {}
     })();
   </script>
@@ -38,19 +47,14 @@
     <a class="nav__brand" href="../index.html" aria-label="Wired Differently home">Wired Differently</a>
     <span class="nav__chapter-label" aria-hidden="true"></span>
     <div class="nav__actions">
-      <button class="nav__btn" id="font-decrease" aria-label="Decrease font size">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 18L9 6l5 12M6.5 13.5h5M16 12h5" stroke-linecap="round"/></svg>
+      <button class="nav__btn nav__btn--aa" id="reader-settings-btn" type="button"
+              aria-label="Reading settings" aria-haspopup="dialog" aria-expanded="false">
+        <span aria-hidden="true">A<span class="nav__aa-small">a</span></span>
       </button>
-      <button class="nav__btn" id="font-increase" aria-label="Increase font size">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 19L9 5l6 14M5.5 14h7M18 9v6M15 12h6" stroke-linecap="round"/></svg>
-      </button>
+
       <a class="nav__btn" href="../toc.html" aria-label="Table of contents">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6" stroke-linecap="round"/><line x1="3" y1="12" x2="21" y2="12" stroke-linecap="round"/><line x1="3" y1="18" x2="21" y2="18" stroke-linecap="round"/></svg>
       </a>
-      <button class="nav__btn" id="theme-toggle" aria-label="Toggle dark mode">
-        <svg class="icon-sun hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
     </div>
   </nav>
 

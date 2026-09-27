@@ -17,6 +17,11 @@ const LS = {
   PROGRESS:      'wired_progress_',
   BOOKMARKS:     'wired_bookmarks',
   WORKSHEET:     'wired_worksheet_',
+  THEME:         'wired_theme',
+  LEADING:       'wired_leading',
+  MARGINS:       'wired_margins',
+  TYPEFACE:      'wired_typeface',
+  IMMERSIVE_HINT:'wired_immersiveHint',
 };
 
 const CHAPTERS = [
@@ -81,28 +86,46 @@ const Storage = {
 
 /* ============================================================
    Theme Manager
+   Four reading palettes. Paper/Sepia render on the light base and
+   Night/Black on the dark base, so data-theme stays 'light'/'dark'
+   for every existing rule and data-palette layers on top. Until the
+   reader picks one explicitly, the system preference decides (and the
+   legacy wired_darkMode flag is honoured).
    ============================================================ */
 const Theme = {
+  palettes: ['paper', 'sepia', 'night', 'black'],
+  isDark(palette) { return palette === 'night' || palette === 'black'; },
+  saved() {
+    const p = Storage.get(LS.THEME);
+    if (this.palettes.includes(p)) return p;
+    const legacy = Storage.get(LS.DARK_MODE);
+    return legacy === null ? null : (legacy ? 'night' : 'paper');
+  },
+  current() {
+    return this.saved() ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'paper');
+  },
   init() {
-    const saved = Storage.get(LS.DARK_MODE);
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = saved !== null ? saved : prefersDark;
-    this.apply(isDark);
-
-    // Listen for system preference changes
+    this.apply(this.current());
+    // Follow the system until the reader chooses a palette
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-      if (Storage.get(LS.DARK_MODE) === null) this.apply(e.matches);
+      if (this.saved() === null) this.apply(e.matches ? 'night' : 'paper');
     });
   },
-  apply(isDark) {
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#06101F');
-    this.updateToggle(isDark);
+  apply(palette) {
+    const root = document.documentElement;
+    root.setAttribute('data-palette', palette);
+    root.setAttribute('data-theme', this.isDark(palette) ? 'dark' : 'light');
+    this.updateToggle(this.isDark(palette));
+    document.dispatchEvent(new CustomEvent('wired:palette', { detail: palette }));
+  },
+  set(palette) {
+    if (!this.palettes.includes(palette)) return;
+    Storage.set(LS.THEME, palette);
+    this.apply(palette);
   },
   toggle() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    Storage.set(LS.DARK_MODE, !isDark);
-    this.apply(!isDark);
+    this.set(this.isDark(this.current()) ? 'paper' : 'night');
   },
   updateToggle(isDark) {
     const btn = document.getElementById('theme-toggle');
@@ -114,33 +137,70 @@ const Theme = {
 };
 
 /* ============================================================
-   Font Size Manager
+   Reading Preferences — text size, line spacing, margins, typeface
+   Each maps to a data-* attribute on <html>; the CSS does the rest.
+   The inline head script applies the same attributes before first
+   paint, so keep the storage keys and attribute names in sync.
    ============================================================ */
-const FontSize = {
-  sizes: ['sm', 'md', 'lg', 'xl'],
+const Prefs = {
+  defs: {
+    fontSize: { key: LS.FONT_SIZE, attr: 'data-font-size', def: 'md',
+                values: ['xs', 'sm', 'md', 'lg', 'xl', 'xxl', 'xxxl'] },
+    leading:  { key: LS.LEADING,   attr: 'data-leading',   def: 'normal',
+                values: ['tight', 'normal', 'loose'] },
+    margins:  { key: LS.MARGINS,   attr: 'data-margins',   def: 'normal',
+                values: ['narrow', 'normal', 'wide'] },
+    typeface: { key: LS.TYPEFACE,  attr: 'data-typeface',  def: 'serif',
+                values: ['serif', 'sans', 'hyper'] },
+  },
+  get(name) {
+    const d = this.defs[name];
+    const v = Storage.get(d.key);
+    return d.values.includes(v) ? v : d.def;
+  },
   init() {
-    const saved = Storage.get(LS.FONT_SIZE, 'md');
-    this.apply(saved);
+    Object.keys(this.defs).forEach(name => this.apply(name, this.get(name)));
   },
-  apply(size) {
-    document.documentElement.setAttribute('data-font-size', size);
+  apply(name, value) {
+    document.documentElement.setAttribute(this.defs[name].attr, value);
   },
-  increase() {
-    const current = document.documentElement.getAttribute('data-font-size') || 'md';
-    const idx = this.sizes.indexOf(current);
-    if (idx < this.sizes.length - 1) {
-      const next = this.sizes[idx + 1];
-      Storage.set(LS.FONT_SIZE, next);
-      this.apply(next);
-    }
+  set(name, value) {
+    const d = this.defs[name];
+    if (!d.values.includes(value)) return;
+    ReadingPlace.keep(() => this.apply(name, value));
+    Storage.set(d.key, value);
   },
-  decrease() {
-    const current = document.documentElement.getAttribute('data-font-size') || 'md';
-    const idx = this.sizes.indexOf(current);
-    if (idx > 0) {
-      const prev = this.sizes[idx - 1];
-      Storage.set(LS.FONT_SIZE, prev);
-      this.apply(prev);
+  step(name, delta) {
+    const d = this.defs[name];
+    const i = d.values.indexOf(this.get(name)) + delta;
+    if (i >= 0 && i < d.values.length) this.set(name, d.values[i]);
+  },
+  reset() {
+    ReadingPlace.keep(() => {
+      Object.entries(this.defs).forEach(([name, d]) => {
+        Storage.remove(d.key);
+        this.apply(name, d.def);
+      });
+    });
+  }
+};
+
+/* Keep the paragraph at the top of the screen in place while the layout
+   reflows (bigger text, wider margins…) so the reader never loses the line */
+const ReadingPlace = {
+  keep(change) {
+    const content = document.getElementById('chapter-content');
+    const probeY = document.querySelector('.nav')?.getBoundingClientRect().bottom + 12 || 12;
+    const hit = content && document.elementFromPoint(window.innerWidth / 2, probeY);
+    const anchor = hit && content.contains(hit)
+      ? hit.closest('p, li, h2, h3, h4, blockquote, table, fieldset, .callout') : null;
+    const before = anchor?.getBoundingClientRect().top;
+    change();
+    if (anchor) {
+      const root = document.documentElement;
+      root.style.scrollBehavior = 'auto';
+      window.scrollBy(0, anchor.getBoundingClientRect().top - before);
+      root.style.scrollBehavior = '';
     }
   }
 };
@@ -437,24 +497,6 @@ const BookmarkUI = {
     // Set initial state
     if (Bookmarks.isBookmarked(chId)) btn.classList.add('is-bookmarked');
 
-    // Tuck the floating button away while reading forward so it never sits
-    // on top of the text; it returns on scroll-up and at either end
-    let lastY = window.scrollY;
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        const atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 80;
-        if (y < 120 || atEnd || y < lastY - 4) btn.classList.remove('is-tucked');
-        else if (y > lastY + 4) btn.classList.add('is-tucked');
-        lastY = y;
-        ticking = false;
-      });
-    }, { passive: true });
-    btn.addEventListener('focus', () => btn.classList.remove('is-tucked'));
-
     btn.addEventListener('click', () => {
       const isNow = Bookmarks.toggle(chId);
       btn.classList.toggle('is-bookmarked', isNow);
@@ -592,6 +634,268 @@ if ('serviceWorker' in navigator) {
 }
 
 /* ============================================================
+   Reader Settings Panel ("Aa")
+   A native <dialog>: focus trapping, Esc and inertness come for free.
+   Built once from JS so no page template has to carry its markup.
+   Every control applies live, so the reader sees the page change
+   behind the lightly dimmed backdrop.
+   ============================================================ */
+const ReaderSettings = {
+  dialog: null,
+
+  groups: [
+    { name: 'typeface', label: 'Typeface', options: [
+      { value: 'serif', label: 'Serif',        face: 'Aa' },
+      { value: 'sans',  label: 'Sans',         face: 'Aa' },
+      { value: 'hyper', label: 'Hyperlegible', face: 'Aa' } ] },
+    { name: 'leading', label: 'Line spacing', options: [
+      { value: 'tight',  label: 'Compact' },
+      { value: 'normal', label: 'Standard' },
+      { value: 'loose',  label: 'Airy' } ] },
+    { name: 'margins', label: 'Margins', options: [
+      { value: 'narrow', label: 'Narrow' },
+      { value: 'normal', label: 'Standard' },
+      { value: 'wide',   label: 'Wide' } ] },
+  ],
+
+  palettes: [
+    { value: 'paper', label: 'Paper' },
+    { value: 'sepia', label: 'Sepia' },
+    { value: 'night', label: 'Night' },
+    { value: 'black', label: 'Black' },
+  ],
+
+  icons: {
+    // Line spacing: three lines whose gap grows left to right
+    leading: {
+      tight:  '<path d="M5 8h14M5 12h14M5 16h14"/>',
+      normal: '<path d="M5 6.5h14M5 12h14M5 17.5h14"/>',
+      loose:  '<path d="M5 5h14M5 12h14M5 19h14"/>',
+    },
+    // Margins: a page outline with a text block that narrows
+    margins: {
+      narrow: '<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M6 8.5h12M6 12h12M6 15.5h12"/>',
+      normal: '<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M7.5 8.5h9M7.5 12h9M7.5 15.5h9"/>',
+      wide:   '<rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M9 8.5h6M9 12h6M9 15.5h6"/>',
+    },
+  },
+
+  init() {
+    const trigger = document.getElementById('reader-settings-btn');
+    if (!trigger) return;
+    this.trigger = trigger;
+    trigger.addEventListener('click', () => this.open());
+  },
+
+  build() {
+    const d = document.createElement('dialog');
+    d.className = 'reader-settings';
+    d.id = 'reader-settings';
+    d.setAttribute('aria-labelledby', 'rs-title');
+    const radios = g => g.options.map(o => `
+        <label class="rs-opt">
+          <input type="radio" name="rs-${g.name}" value="${o.value}">
+          <span class="rs-opt__face${g.name === 'typeface' ? ' rs-opt__face--' + o.value : ''}">
+            ${o.face ? `<span class="rs-opt__sample" aria-hidden="true">${o.face}</span>`
+                     : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">${this.icons[g.name][o.value]}</svg>`}
+            <span class="rs-opt__label">${o.label}</span>
+          </span>
+        </label>`).join('');
+
+    d.innerHTML = `
+      <div class="reader-settings__inner">
+        <div class="reader-settings__grip" aria-hidden="true"></div>
+        <header class="reader-settings__head">
+          <h2 class="reader-settings__title" id="rs-title">Reading settings</h2>
+          <button type="button" class="reader-settings__done" data-close>Done</button>
+        </header>
+
+        <div class="rs-row" role="group" aria-labelledby="rs-size-label">
+          <span class="rs-label" id="rs-size-label">Text size</span>
+          <div class="rs-size">
+            <button type="button" class="rs-size__btn rs-size__btn--down" data-size="-1" aria-label="Smaller text">A</button>
+            <div class="rs-size__track" aria-hidden="true">
+              ${Prefs.defs.fontSize.values.map(() => '<span class="rs-size__dot"></span>').join('')}
+            </div>
+            <button type="button" class="rs-size__btn rs-size__btn--up" data-size="1" aria-label="Larger text">A</button>
+          </div>
+          <output class="sr-only" id="rs-size-status" aria-live="polite"></output>
+        </div>
+
+        ${this.groups.map(g => `
+        <fieldset class="rs-row">
+          <legend class="rs-label">${g.label}</legend>
+          <div class="rs-seg">${radios(g)}</div>
+        </fieldset>`).join('')}
+
+        <fieldset class="rs-row">
+          <legend class="rs-label">Theme</legend>
+          <div class="rs-seg rs-seg--themes">
+            ${this.palettes.map(p => `
+            <label class="rs-opt">
+              <input type="radio" name="rs-palette" value="${p.value}">
+              <span class="rs-opt__face rs-swatch rs-swatch--${p.value}">
+                <span class="rs-swatch__chip" aria-hidden="true">Aa</span>
+                <span class="rs-opt__label">${p.label}</span>
+              </span>
+            </label>`).join('')}
+          </div>
+        </fieldset>
+
+        <button type="button" class="rs-reset">Reset text settings</button>
+      </div>`;
+
+    d.addEventListener('change', e => {
+      const input = e.target;
+      if (input.name === 'rs-palette') Theme.set(input.value);
+      else Prefs.set(input.name.replace('rs-', ''), input.value);
+    });
+    d.addEventListener('click', e => {
+      const sizeBtn = e.target.closest('[data-size]');
+      if (sizeBtn) { Prefs.step('fontSize', Number(sizeBtn.dataset.size)); this.sync(true); return; }
+      if (e.target.closest('[data-close]')) { this.close(); return; }
+      if (e.target.closest('.rs-reset')) { Prefs.reset(); this.sync(); return; }
+      // Tap on the backdrop (the dialog box itself, outside the sheet) closes
+      if (e.target === d) this.close();
+    });
+    d.addEventListener('close', () => {
+      document.body.classList.remove('is-settings-open');
+      this.trigger?.setAttribute('aria-expanded', 'false');
+    });
+    document.addEventListener('wired:palette', () => this.sync());
+
+    document.body.appendChild(d);
+    this.dialog = d;
+  },
+
+  sync(announce = false) {
+    const d = this.dialog;
+    if (!d) return;
+    ['typeface', 'leading', 'margins'].forEach(name => {
+      const el = d.querySelector(`input[name="rs-${name}"][value="${Prefs.get(name)}"]`);
+      if (el) el.checked = true;
+    });
+    const pal = d.querySelector(`input[name="rs-palette"][value="${Theme.current()}"]`);
+    if (pal) pal.checked = true;
+
+    const sizes = Prefs.defs.fontSize.values;
+    const idx = sizes.indexOf(Prefs.get('fontSize'));
+    d.querySelectorAll('.rs-size__dot').forEach((dot, i) => dot.classList.toggle('is-on', i <= idx));
+    d.querySelector('.rs-size__btn--down').disabled = idx === 0;
+    d.querySelector('.rs-size__btn--up').disabled = idx === sizes.length - 1;
+    if (announce) d.querySelector('#rs-size-status').textContent = `Text size ${idx + 1} of ${sizes.length}`;
+  },
+
+  open() {
+    if (!this.dialog) this.build();
+    this.sync();
+    Immersive.show();
+    document.body.classList.add('is-settings-open');
+    this.trigger?.setAttribute('aria-expanded', 'true');
+    if (typeof this.dialog.showModal === 'function') this.dialog.showModal();
+    else this.dialog.setAttribute('open', '');
+  },
+
+  close() {
+    if (!this.dialog) return;
+    if (typeof this.dialog.close === 'function') this.dialog.close();
+    else { this.dialog.removeAttribute('open'); this.dialog.dispatchEvent(new Event('close')); }
+  },
+
+  isOpen() { return Boolean(this.dialog?.open); }
+};
+
+/* ============================================================
+   Immersive Reading
+   Chrome (nav bar, bookmark button) slides away while reading forward
+   and returns on scroll-up, at either end of the chapter, on a tap in
+   the page, or when keyboard focus moves into it. The progress hairline
+   stays, riding up to the top edge.
+   ============================================================ */
+const Immersive = {
+  active: false,
+  pointerType: '',
+
+  init() {
+    this.meta = document.querySelector('meta[name="theme-color"]');
+    this.navColor = this.meta?.getAttribute('content') || '#06101F';
+    let lastY = window.scrollY;
+    let ticking = false;
+
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 96;
+        if (ReaderSettings.isOpen() || y < 96 || atEnd) this.show();
+        else if (y > lastY + 6) this.hide();
+        else if (y < lastY - 6) this.show();
+        lastY = y;
+        ticking = false;
+      });
+    }, { passive: true });
+
+    // Tap anywhere in the text toggles the chrome, touch/pen only, so a
+    // desktop click to place the caret or select text never does
+    document.addEventListener('pointerdown', e => { this.pointerType = e.pointerType; }, { passive: true });
+    document.addEventListener('click', e => {
+      if (this.pointerType !== 'touch' && this.pointerType !== 'pen') return;
+      if (e.target.closest('a, button, input, textarea, select, label, summary, dialog, .nav, [contenteditable]')) return;
+      if (!window.getSelection()?.isCollapsed) return;
+      if (window.scrollY < 96) return;
+      this.active ? this.show() : this.hide();
+    });
+
+    // Keyboard users tabbing into hidden chrome bring it back
+    document.addEventListener('focusin', e => {
+      if (e.target.closest('.nav, .bookmark-btn')) this.show();
+    });
+
+    document.addEventListener('wired:palette', () => this.paintStatusBar());
+  },
+
+  hide() {
+    if (this.active) return;
+    this.active = true;
+    document.body.classList.add('is-immersive');
+    this.paintStatusBar();
+    this.hintOnce();
+  },
+
+  show() {
+    if (!this.active) return;
+    this.active = false;
+    document.body.classList.remove('is-immersive');
+    this.paintStatusBar();
+  },
+
+  // Browser/status-bar tint follows whatever sits at the top edge
+  paintStatusBar() {
+    if (!this.meta) return;
+    const page = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
+    this.meta.setAttribute('content', this.active && page ? page : this.navColor);
+  },
+
+  hintOnce() {
+    if (Storage.get(LS.IMMERSIVE_HINT)) return;
+    Storage.set(LS.IMMERSIVE_HINT, true);
+    const tip = document.createElement('div');
+    tip.className = 'reader-hint';
+    tip.setAttribute('role', 'status');
+    tip.textContent = matchMedia('(pointer: coarse)').matches
+      ? 'Tap the page or scroll up to show controls'
+      : 'Scroll up to show controls';
+    document.body.appendChild(tip);
+    requestAnimationFrame(() => tip.classList.add('is-visible'));
+    setTimeout(() => {
+      tip.classList.remove('is-visible');
+      setTimeout(() => tip.remove(), 400);
+    }, 3200);
+  }
+};
+
+/* ============================================================
    Touch Navigation — deliberate horizontal swipe only
    ============================================================ */
 const TouchNav = {
@@ -722,6 +1026,7 @@ const KeyboardNav = {
     document.addEventListener('keydown', e => {
       // Don't fire in inputs, or when a modifier is held
       if (e.target.matches('input, textarea, select')) return;
+      if (ReaderSettings.isOpen()) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // Left/Right turn pages; Up/Down are left alone for normal scrolling
       if (e.key === 'ArrowLeft') {
@@ -733,6 +1038,9 @@ const KeyboardNav = {
         if (next) window.location.href = Paths.chapter(next.id);
       }
       if (e.key === 't' || e.key === 'T') Nav.goToTOC();
+      if (e.key === 'a' || e.key === 'A') ReaderSettings.open();
+      if (e.key === '+' || e.key === '=') Prefs.step('fontSize', 1);
+      if (e.key === '-' || e.key === '_') Prefs.step('fontSize', -1);
       if (e.key === 'b' || e.key === 'B') document.getElementById('bookmark-btn')?.click();
     });
   }
@@ -744,7 +1052,7 @@ const KeyboardNav = {
 const App = {
   initCover() {
     Theme.init();
-    FontSize.init();
+    Prefs.init();
     CoverResume.init();
     EmbeddedBrowserCompat.init();
     this._bindThemeToggle();
@@ -752,7 +1060,8 @@ const App = {
 
   initTOC() {
     Theme.init();
-    FontSize.init();
+    Prefs.init();
+    ReaderSettings.init();
     TOCState.init();
     BookmarkList.init();
     BookSearch.init();
@@ -762,7 +1071,8 @@ const App = {
 
   initChapter(chId) {
     Theme.init();
-    FontSize.init();
+    Prefs.init();
+    ReaderSettings.init();
     ReadingProgressBar.init();
     ReadingProgressBar.show();
     ScrollPersist.init(chId);
@@ -789,18 +1099,13 @@ const App = {
         label.replaceChildren(long, short);
       }
       document.body.classList.add('is-chapter');
+      Immersive.init();
     }
     this._bindThemeToggle();
-    this._bindFontSizeControls();
   },
 
   _bindThemeToggle() {
     document.getElementById('theme-toggle')?.addEventListener('click', () => Theme.toggle());
-  },
-
-  _bindFontSizeControls() {
-    document.getElementById('font-increase')?.addEventListener('click', () => FontSize.increase());
-    document.getElementById('font-decrease')?.addEventListener('click', () => FontSize.decrease());
   }
 };
 

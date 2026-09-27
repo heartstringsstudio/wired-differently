@@ -3,8 +3,8 @@
  * Fresh content online, complete-book fallback offline.
  */
 
-const APP_CACHE = 'wired-differently-app-v14';
-const ASSET_CACHE = 'wired-differently-assets-v2';
+const APP_CACHE = 'wired-differently-app-v15';
+const ASSET_CACHE = 'wired-differently-assets-v3';
 const CACHE_PREFIX = 'wired-differently-';
 
 const scoped = path => new URL(path, self.registration.scope).href;
@@ -27,6 +27,10 @@ const IMMUTABLE_ASSETS = [
   './fonts/lora-var.woff2',
   './fonts/lora-var-italic.woff2',
   './fonts/dmsans-var.woff2',
+  './fonts/atkinson-400-normal.woff2',
+  './fonts/atkinson-400-italic.woff2',
+  './fonts/atkinson-700-normal.woff2',
+  './fonts/atkinson-700-italic.woff2',
   ...[16, 32, 72, 96, 128, 144, 152, 180, 192, 512]
     .map(size => `./icons/icon-${size}.png`),
   './icons/icon-512-maskable.png'

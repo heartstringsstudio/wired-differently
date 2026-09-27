@@ -30,6 +30,38 @@
   src: url('../fonts/dmsans-var.woff2') format('woff2');
 }
 
+/* Atkinson Hyperlegible (Braille Institute, SIL OFL 1.1 — see
+   fonts/OFL-atkinson-hyperlegible.txt). Only fetched when the reader
+   picks the Hyperlegible typeface; precached for offline. */
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/atkinson-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/atkinson-400-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/atkinson-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/atkinson-700-italic.woff2') format('woff2');
+}
+
 /* ============================================================
    CSS Custom Properties — Light Mode (default)
    ============================================================ */
@@ -64,6 +96,7 @@
   --font-size-base:  112.5%;
   --line-height:     1.75;
   --measure:         68ch;  /* comfortable line length */
+  --gutter-scale:    1;     /* reader margin preference */
 
   /* Spacing */
   --space-xs:  0.25rem;
@@ -113,6 +146,44 @@
   --shadow-md:       0 4px 12px rgba(0,0,0,0.30);
   --shadow-lg:       0 8px 24px rgba(0,0,0,0.40);
 }
+
+/* --- Reading palettes (layered on the light/dark base above) --- */
+[data-palette="sepia"] {
+  --bg-primary:      #F3EAD6;
+  --bg-secondary:    #EADFC6;
+  --bg-elevated:     #FAF4E6;
+  --text-primary:    #3A2E1F;
+  --text-secondary:  #5A4A35;
+  --text-muted:      #75654F;
+  --accent:          #7B4F16;
+  --accent-light:    #95631F;
+  --accent-faint:    rgba(123, 79, 22, 0.10);
+  --highlight:       #7A5200;
+  --highlight-faint: rgba(196, 140, 40, 0.16);
+  --border:          rgba(58, 46, 31, 0.13);
+  --border-strong:   rgba(58, 46, 31, 0.26);
+}
+
+[data-palette="black"] {
+  --bg-primary:      #000000;
+  --bg-secondary:    #0A0A0B;
+  --bg-elevated:     #141517;
+  --text-primary:    #D6D2C8;
+  --text-secondary:  #ABA79E;
+  --text-muted:      #8C8880;
+  --border:          rgba(255, 255, 255, 0.09);
+  --border-strong:   rgba(255, 255, 255, 0.18);
+}
+
+/* --- Reading preferences --- */
+[data-leading="tight"] { --line-height: 1.55; }
+[data-leading="loose"] { --line-height: 2; }
+
+[data-margins="narrow"] { --gutter-scale: 0.5;  --measure: 80ch; --content-width: 820px; }
+[data-margins="wide"]   { --gutter-scale: 1.75; --measure: 58ch; --content-width: 640px; }
+
+[data-typeface="sans"]  { --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+[data-typeface="hyper"] { --font-body: 'Atkinson Hyperlegible', Verdana, sans-serif; }
 
 /* ============================================================
    Reset & Base
@@ -184,7 +255,8 @@ a:hover {
   justify-content: space-between;
   padding: env(safe-area-inset-top) max(var(--space-lg), env(safe-area-inset-right)) 0 max(var(--space-lg), env(safe-area-inset-left));
   z-index: var(--z-nav);
-  transition: background-color var(--transition-med), border-color var(--transition-med);
+  transition: background-color var(--transition-med), border-color var(--transition-med),
+              transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 320ms ease;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   background: rgba(6, 16, 31, 0.96);
@@ -238,6 +310,28 @@ a:hover {
 .nav__btn svg {
   width: 18px;
   height: 18px;
+}
+
+.nav__btn:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: -2px;
+}
+
+.nav__btn--aa {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.nav__aa-small {
+  font-size: 0.8em;
+}
+
+.nav__btn--aa[aria-expanded="true"] {
+  background: rgba(98, 200, 242, 0.18);
+  color: var(--brand-cyan);
 }
 
 /* Nav chapter label (shown in chapter view) */
@@ -858,7 +952,8 @@ a:hover {
 .chapter-view {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-3xl) var(--space-xl);
+  padding: var(--space-3xl) calc(var(--space-xl) * var(--gutter-scale));
+  transition: max-width var(--transition-med), padding var(--transition-med);
 }
 
 /* Chapter header */
@@ -932,6 +1027,7 @@ a:hover {
   height: 2px;
   background: rgba(98, 200, 242, 0.14);
   z-index: var(--z-nav);
+  transition: transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .reading-progress-bar__fill {
@@ -1001,7 +1097,7 @@ a:hover {
 
 .prose li {
   margin-bottom: 0.5em;
-  line-height: 1.65;
+  line-height: calc(var(--line-height) - 0.1);
 }
 
 .prose blockquote {
@@ -1377,12 +1473,6 @@ a:hover {
   display: none;  /* shown only in chapter views via JS */
 }
 
-.bookmark-btn.is-tucked {
-  opacity: 0;
-  transform: translateY(12px);
-  pointer-events: none;
-}
-
 .bookmark-btn:hover {
   background: #132D47;
   border-color: var(--brand-cyan);
@@ -1485,10 +1575,13 @@ a:hover {
 }
 
 /* Font size scale applied to body */
-[data-font-size="sm"] { --font-size-base: 100%; }
-[data-font-size="md"] { --font-size-base: 112.5%; }  /* default */
-[data-font-size="lg"] { --font-size-base: 125%; }
-[data-font-size="xl"] { --font-size-base: 137.5%; }
+[data-font-size="xs"]   { --font-size-base: 93.75%; }
+[data-font-size="sm"]   { --font-size-base: 100%; }
+[data-font-size="md"]   { --font-size-base: 112.5%; }  /* default */
+[data-font-size="lg"]   { --font-size-base: 125%; }
+[data-font-size="xl"]   { --font-size-base: 137.5%; }
+[data-font-size="xxl"]  { --font-size-base: 150%; }
+[data-font-size="xxxl"] { --font-size-base: 165%; }
 
 /* ============================================================
    Empty State / Loading
@@ -1540,7 +1633,7 @@ a:hover {
      17px base wins over the user's chosen size and the font-size
      controls appear to do nothing on phones. */
   .toc { padding: var(--space-2xl) var(--space-md); }
-  .chapter-view { padding: var(--space-2xl) var(--space-md); }
+  .chapter-view { padding: var(--space-2xl) calc(var(--space-md) * var(--gutter-scale)); }
   .cover { padding: var(--space-2xl) var(--space-lg); }
 
   .chapter-nav__btn { font-size: 0.8rem; }
@@ -1570,9 +1663,11 @@ a:hover {
 
 /* Wide layout: more generous reading margins */
 @media (min-width: 900px) {
-  .chapter-view,
   .toc {
     padding: var(--space-3xl) var(--space-3xl);
+  }
+  .chapter-view {
+    padding: var(--space-3xl) calc(var(--space-3xl) * var(--gutter-scale));
   }
 }
 
@@ -1601,6 +1696,383 @@ a:hover {
 
   .prose h2 { page-break-after: avoid; }
   .prose p  { orphans: 3; widows: 3; }
+}
+
+/* ============================================================
+   Immersive Reading — chrome slides away while reading forward
+   ============================================================ */
+.is-immersive .nav {
+  transform: translateY(-100%);
+  box-shadow: none;
+}
+
+/* The progress hairline stays, riding up to the top edge */
+.is-immersive .reading-progress-bar {
+  transform: translateY(calc(-1 * var(--nav-height)));
+}
+
+.is-immersive .bookmark-btn {
+  opacity: 0;
+  transform: translateY(12px) scale(0.9);
+  pointer-events: none;
+}
+
+/* Under a translucent iOS status bar, keep the text from scrolling
+   beneath the clock once the nav is gone */
+body.is-chapter::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top);
+  background: var(--bg-primary);
+  z-index: calc(var(--z-nav) - 1);
+}
+
+.reader-hint {
+  position: fixed;
+  left: 50%;
+  bottom: max(var(--space-xl), calc(env(safe-area-inset-bottom) + var(--space-md)));
+  transform: translate(-50%, 8px);
+  width: max-content;
+  max-width: calc(100vw - 2 * var(--space-xl));
+  padding: 0.625rem 1rem;
+  font: 500 0.8125rem/1.3 var(--font-ui);
+  color: var(--brand-cream);
+  background: rgba(6, 16, 31, 0.92);
+  border: 1px solid rgba(98, 200, 242, 0.25);
+  border-radius: 100px;
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease, transform 300ms ease;
+  z-index: var(--z-overlay);
+  text-align: center;
+}
+
+.reader-hint.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ============================================================
+   Reader Settings Panel ("Aa")
+   Bottom sheet on phones, popover under the nav on wider screens.
+   ============================================================ */
+.reader-settings {
+  /* Reset UA dialog styles */
+  border: 0;
+  padding: 0;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  /* Phone: bottom sheet */
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: min(88dvh, 640px);
+  margin: 0;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.22);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.reader-settings[open] {
+  animation: rs-sheet-in 280ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Barely dim the page so text changes stay visible while adjusting */
+.reader-settings::backdrop {
+  background: rgba(6, 16, 31, 0.18);
+}
+
+@keyframes rs-sheet-in {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.reader-settings__inner {
+  padding: var(--space-sm) var(--space-lg)
+           max(var(--space-lg), calc(env(safe-area-inset-bottom) + var(--space-md)));
+  font-family: var(--font-ui);
+}
+
+.reader-settings__grip {
+  width: 36px;
+  height: 4px;
+  margin: 0 auto var(--space-sm);
+  border-radius: 2px;
+  background: var(--border-strong);
+}
+
+.reader-settings__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.reader-settings__title {
+  font: 600 1rem var(--font-ui);
+  letter-spacing: 0.01em;
+}
+
+.reader-settings__done {
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  font: 600 0.9375rem var(--font-ui);
+  color: var(--accent);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.rs-row {
+  border: 0;
+  margin: 0;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+.rs-label {
+  display: block;
+  /* Floated so a fieldset legend sits inside the row, not on its border */
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--space-sm);
+  font: 600 0.6875rem var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Text size stepper */
+.rs-size {
+  clear: both;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.rs-size__btn {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Lora', Georgia, serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.rs-size__btn--down { font-size: 0.875rem; }
+.rs-size__btn--up   { font-size: 1.375rem; }
+
+.rs-size__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.rs-size__track {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  position: relative;
+}
+
+.rs-size__track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--border-strong);
+}
+
+.rs-size__dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-strong);
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.rs-size__dot.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Segmented option groups (native radios, visually replaced) */
+.rs-seg {
+  clear: both;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.rs-seg--themes {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.rs-opt {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.rs-opt input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.rs-opt__face {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 48px;
+  padding: var(--space-xs);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+.rs-opt__face svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.rs-opt__label {
+  font: 500 0.75rem/1.2 var(--font-ui);
+  text-align: center;
+}
+
+.rs-opt__sample {
+  font-size: 1.125rem;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.rs-opt__face--serif .rs-opt__sample { font-family: 'Lora', Georgia, serif; }
+.rs-opt__face--sans  .rs-opt__sample { font-family: 'DM Sans', sans-serif; }
+.rs-opt__face--hyper .rs-opt__sample { font-family: 'Atkinson Hyperlegible', Verdana, sans-serif; }
+
+.rs-opt:hover .rs-opt__face {
+  border-color: var(--border-strong);
+}
+
+.rs-opt input:checked + .rs-opt__face {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-faint);
+}
+
+.rs-opt input:checked + .rs-opt__face .rs-opt__label {
+  font-weight: 600;
+}
+
+.rs-opt input:focus-visible + .rs-opt__face,
+.rs-size__btn:focus-visible,
+.reader-settings__done:focus-visible,
+.rs-reset:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Theme swatches preview each palette regardless of the current one */
+.rs-swatch {
+  flex-direction: column;
+  gap: 0.3rem;
+  background: transparent;
+}
+
+.rs-swatch__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font: 600 1rem 'Lora', Georgia, serif;
+  border: 1px solid var(--border-strong);
+}
+
+.rs-swatch--paper .rs-swatch__chip { background: #F7F5EF; color: #101923; }
+.rs-swatch--sepia .rs-swatch__chip { background: #F3EAD6; color: #3A2E1F; }
+.rs-swatch--night .rs-swatch__chip { background: #081321; color: #F5F3EC; }
+.rs-swatch--black .rs-swatch__chip { background: #000000; color: #D6D2C8; }
+
+.rs-opt input:checked + .rs-swatch {
+  background: transparent;
+  border-color: transparent;
+}
+
+.rs-opt input:checked + .rs-swatch .rs-swatch__chip {
+  box-shadow: 0 0 0 2px var(--bg-elevated), 0 0 0 4px var(--accent);
+}
+
+.rs-reset {
+  display: block;
+  min-height: 44px;
+  margin: var(--space-xs) auto 0;
+  padding: 0 var(--space-md);
+  font: 500 0.8125rem var(--font-ui);
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.rs-reset:hover {
+  color: var(--accent);
+}
+
+/* Wider screens: a popover under the Aa button */
+@media (min-width: 700px) {
+  .reader-settings {
+    inset: calc(var(--nav-height) + env(safe-area-inset-top) + var(--space-sm))
+           max(var(--space-xl), env(safe-area-inset-right)) auto auto;
+    width: 380px;
+    max-height: calc(100dvh - var(--nav-height) - 2 * var(--space-xl));
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+  }
+  .reader-settings[open] {
+    animation-name: rs-pop-in;
+  }
+  .reader-settings__grip { display: none; }
+  .reader-settings__inner { padding: var(--space-md) var(--space-lg) var(--space-lg); }
+}
+
+@keyframes rs-pop-in {
+  from { transform: translateY(-6px) scale(0.98); opacity: 0; }
+  to   { transform: translateY(0) scale(1);        opacity: 1; }
 }
 
 /* ============================================================
