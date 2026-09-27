@@ -280,7 +280,14 @@ const ScrollPersist = {
     // Restore saved position
     const saved = Progress.getScroll(chId);
     if (saved > 0) {
-      const restore = () => requestAnimationFrame(() => window.scrollTo(0, saved));
+      // Jump straight to the saved spot; the page-wide smooth scrolling
+      // would otherwise animate down from the top on every open
+      const restore = () => requestAnimationFrame(() => {
+        const root = document.documentElement;
+        root.style.scrollBehavior = 'auto';
+        window.scrollTo(0, saved);
+        root.style.scrollBehavior = '';
+      });
       if (document.fonts?.ready) document.fonts.ready.then(restore);
       else restore();
     }
@@ -429,6 +436,24 @@ const BookmarkUI = {
 
     // Set initial state
     if (Bookmarks.isBookmarked(chId)) btn.classList.add('is-bookmarked');
+
+    // Tuck the floating button away while reading forward so it never sits
+    // on top of the text; it returns on scroll-up and at either end
+    let lastY = window.scrollY;
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 80;
+        if (y < 120 || atEnd || y < lastY - 4) btn.classList.remove('is-tucked');
+        else if (y > lastY + 4) btn.classList.add('is-tucked');
+        lastY = y;
+        ticking = false;
+      });
+    }, { passive: true });
+    btn.addEventListener('focus', () => btn.classList.remove('is-tucked'));
 
     btn.addEventListener('click', () => {
       const isNow = Bookmarks.toggle(chId);
@@ -752,10 +777,16 @@ const App = {
       Progress.saveLastChapter(chId);
       // Update nav label with position context ("Ch. 5 of 27 — Title")
       const label = document.querySelector('.nav__chapter-label');
+      // Both forms are rendered; CSS picks one per screen width so the
+      // label stays correct across rotation and window resizes
       if (label) {
-        label.textContent = window.matchMedia('(max-width: 480px)').matches
-          ? `Ch. ${ch.num} / ${CHAPTERS.length}`
-          : `Ch. ${ch.num} of ${CHAPTERS.length} — ${ch.title}`;
+        const long = document.createElement('span');
+        long.className = 'nav__chapter-label-long';
+        long.textContent = `Ch. ${ch.num} of ${CHAPTERS.length} — ${ch.title}`;
+        const short = document.createElement('span');
+        short.className = 'nav__chapter-label-short';
+        short.textContent = `Ch. ${ch.num} · ${ch.title}`;
+        label.replaceChildren(long, short);
       }
       document.body.classList.add('is-chapter');
     }
