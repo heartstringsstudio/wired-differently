@@ -15,16 +15,25 @@
     })();
   </script>
   <script>
-    /* Apply saved theme + font size before first paint to prevent FOUC */
+    /* Apply saved reading settings before first paint to prevent FOUC.
+       Keep in sync with Theme and Prefs in js/app.js. */
     (function () {
       try {
         var d = document.documentElement, s = localStorage;
-        var t = s.getItem('wired_darkMode');
-        var dark = t !== null ? JSON.parse(t)
-                              : matchMedia('(prefers-color-scheme: dark)').matches;
-        d.setAttribute('data-theme', dark ? 'dark' : 'light');
-        var f = s.getItem('wired_fontSize');
-        if (f) d.setAttribute('data-font-size', JSON.parse(f));
+        var p = JSON.parse(s.getItem('wired_theme'));
+        if (!p) {
+          var t = s.getItem('wired_darkMode');
+          var dark = t !== null ? JSON.parse(t)
+                                : matchMedia('(prefers-color-scheme: dark)').matches;
+          p = dark ? 'night' : 'paper';
+        }
+        d.setAttribute('data-palette', p);
+        d.setAttribute('data-theme', p === 'night' || p === 'black' ? 'dark' : 'light');
+        ['fontSize:font-size', 'leading:leading', 'margins:margins', 'typeface:typeface']
+          .forEach(function (pair) {
+            var k = pair.split(':'), v = s.getItem('wired_' + k[0]);
+            if (v) d.setAttribute('data-' + k[1], JSON.parse(v));
+          });
       } catch (e) {}
     })();
   </script>

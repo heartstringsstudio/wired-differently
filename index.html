@@ -5,22 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <script>
-    /* Apply saved theme + font size before first paint to prevent FOUC */
+    /* Apply saved reading settings before first paint to prevent FOUC.
+       Keep in sync with Theme and Prefs in js/app.js. */
     (function () {
       try {
         var d = document.documentElement, s = localStorage;
-        var t = s.getItem('wired_darkMode');
-        var dark = t !== null ? JSON.parse(t)
-                              : matchMedia('(prefers-color-scheme: dark)').matches;
-        d.setAttribute('data-theme', dark ? 'dark' : 'light');
-        var f = s.getItem('wired_fontSize');
-        if (f) d.setAttribute('data-font-size', JSON.parse(f));
-      } catch (e) {}
-      /* Skip the cover splash if it was already shown this session */
-      try {
-        if (sessionStorage.getItem('wired_splashSeen')) {
-          d.setAttribute('data-skip-splash', '');
+        var p = JSON.parse(s.getItem('wired_theme'));
+        if (!p) {
+          var t = s.getItem('wired_darkMode');
+          var dark = t !== null ? JSON.parse(t)
+                                : matchMedia('(prefers-color-scheme: dark)').matches;
+          p = dark ? 'night' : 'paper';
         }
+        d.setAttribute('data-palette', p);
+        d.setAttribute('data-theme', p === 'night' || p === 'black' ? 'dark' : 'light');
+        ['fontSize:font-size', 'leading:leading', 'margins:margins', 'typeface:typeface']
+          .forEach(function (pair) {
+            var k = pair.split(':'), v = s.getItem('wired_' + k[0]);
+            if (v) d.setAttribute('data-' + k[1], JSON.parse(v));
+          });
       } catch (e) {}
       /* Facebook, Messenger, and Instagram use embedded WebViews whose
          tap/transition behavior differs from full browsers. */
@@ -33,7 +36,7 @@
   <meta name="description" content="Wired Differently: A Practical Manual for Adults with High IQ and ADHD" />
   <meta name="theme-color" content="#06101F" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Wired Differently" />
 
   <title>Wired Differently — A Practical Manual</title>
@@ -41,7 +44,7 @@
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json" />
 
-  <!-- Icons (flag: these need to be generated — see icons/ directory) -->
+  <!-- Icons -->
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png" />
@@ -49,61 +52,13 @@
   <!-- Styles -->
   <link rel="stylesheet" href="css/style.css" />
 
-  <!-- Preconnect for Google Fonts (loaded in CSS) -->
+  <!-- Cover art is the first thing on screen; fetch it with the fonts -->
+  <link rel="preload" href="images/bookcover.webp" as="image" type="image/webp" fetchpriority="high" />
   <link rel="preload" href="fonts/lora-var.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/lora-var-italic.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/dmsans-var.woff2" as="font" type="font/woff2" crossorigin />
 </head>
 <body>
-
-  <!-- Book Cover Splash Screen -->
-  <div id="splash-screen" class="splash" role="button" tabindex="0"
-       aria-label="Book cover — tap to enter the app">
-    <img src="images/bookcover.webp"
-         alt="Wired Differently — For Adults with High IQ and ADHD, by Tim Harbert"
-         class="splash__img" />
-    <p class="splash__hint" aria-hidden="true">Tap anywhere to continue</p>
-  </div>
-
-  <script>
-    (function () {
-      var splash = document.getElementById('splash-screen');
-      /* Already shown this session — CSS keeps it hidden, nothing to do */
-      if (document.documentElement.hasAttribute('data-skip-splash')) return;
-      try { sessionStorage.setItem('wired_splashSeen', '1'); } catch (e) {}
-      var timer = setTimeout(dismiss, 1800);
-      var dismissed = false;
-      function dismiss() {
-        if (dismissed) return;
-        dismissed = true;
-        clearTimeout(timer);
-        /* Stop the full-screen layer from intercepting the next tap before
-           waiting for any visual transition to finish. */
-        splash.style.pointerEvents = 'none';
-        splash.setAttribute('aria-hidden', 'true');
-        splash.setAttribute('inert', '');
-        if (document.documentElement.hasAttribute('data-embedded-browser')) {
-          splash.style.display = 'none';
-          return;
-        }
-        splash.classList.add('splash--out');
-        splash.addEventListener('transitionend', function () {
-          splash.style.display = 'none';
-        }, { once: true });
-        /* Belt-and-braces: hide even if transitionend never fires
-           (e.g. reduced-motion collapses the transition) */
-        setTimeout(function () { splash.style.display = 'none'; }, 800);
-      }
-      splash.addEventListener('click', dismiss);
-      splash.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') dismiss();
-      });
-      splash.addEventListener('touchend', function (e) {
-        e.preventDefault();
-        dismiss();
-      }, { passive: false });
-    })();
-  </script>
 
   <!-- Navigation -->
   <nav class="nav" role="navigation" aria-label="Main navigation">
@@ -129,39 +84,55 @@
     </div>
   </nav>
 
-  <!-- Cover / Landing Page -->
+  <!-- Cover / Landing Page — the book itself, then the way in -->
   <main class="page" id="cover-page">
-    <section class="cover" aria-label="Book cover">
+    <section class="cover" aria-labelledby="cover-title">
 
-      <p class="cover__eyebrow fade-in">A Practical Manual</p>
+      <div class="cover__book fade-in">
+        <img class="cover__art" src="images/bookcover.webp" width="1024" height="1536"
+             alt="Wired Differently — For Adults with High IQ and ADHD, by Tim Harbert"
+             fetchpriority="high" decoding="async" />
+      </div>
 
-      <h1 class="cover__title fade-in fade-in-delay-1">
-        <em>Wired</em><br>Differently
-      </h1>
+      <div class="cover__panel">
+        <!-- Title copy repeats what the cover art shows, so on phones it is
+             visually hidden and the art speaks; wider screens show it -->
+        <div class="cover__intro">
+          <p class="cover__eyebrow">A Practical Manual</p>
+          <h1 class="cover__title" id="cover-title"><em>Wired</em> Differently</h1>
+          <p class="cover__subtitle">
+            For Adults with High IQ and ADHD — a clear-eyed, practical guide
+            to understanding how your brain actually works and building a life
+            that fits it.
+          </p>
+          <p class="cover__byline">Tim Harbert</p>
+        </div>
 
-      <p class="cover__subtitle fade-in fade-in-delay-2">
-        For Adults with High IQ and ADHD — a clear-eyed, practical guide
-        to understanding how your brain actually works and building a life
-        that fits it.
-      </p>
+        <p class="cover__meta fade-in fade-in-delay-1" id="cover-meta">27 chapters</p>
 
-      <div class="cover__divider fade-in fade-in-delay-2" aria-hidden="true"></div>
+        <div class="cover__progress fade-in fade-in-delay-1" id="cover-progress" hidden>
+          <div class="cover__progress-bar" aria-hidden="true"><span id="cover-progress-fill"></span></div>
+          <span class="cover__progress-label" id="cover-progress-label"></span>
+        </div>
 
-      <div class="cover__resume fade-in fade-in-delay-3" id="resume-reading" aria-live="polite"></div>
+        <div class="cover__actions fade-in fade-in-delay-2">
+          <div class="cover__resume" id="resume-reading" aria-live="polite"></div>
 
-      <a href="toc.html" target="_self" data-direct-nav
-         class="cover__enter-btn fade-in fade-in-delay-3"
-         aria-label="Open table of contents">
-        Begin Reading
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-        </svg>
-      </a>
+          <a href="chapters/ch01.html" target="_self" data-direct-nav
+             class="cover__enter-btn"
+             aria-label="Begin reading — Chapter 1: Introduction">
+            Begin Reading
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
 
-      <p class="cover__meta fade-in fade-in-delay-4" aria-hidden="true">
-        27 Chapters &nbsp;·&nbsp; Complete Manual
-      </p>
+          <a href="toc.html" target="_self" data-direct-nav class="cover__contents-link">
+            Table of Contents
+          </a>
+        </div>
+      </div>
 
     </section>
   </main>

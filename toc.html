@@ -5,16 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <script>
-    /* Apply saved theme + font size before first paint to prevent FOUC */
+    /* Apply saved reading settings before first paint to prevent FOUC.
+       Keep in sync with Theme and Prefs in js/app.js. */
     (function () {
       try {
         var d = document.documentElement, s = localStorage;
-        var t = s.getItem('wired_darkMode');
-        var dark = t !== null ? JSON.parse(t)
-                              : matchMedia('(prefers-color-scheme: dark)').matches;
-        d.setAttribute('data-theme', dark ? 'dark' : 'light');
-        var f = s.getItem('wired_fontSize');
-        if (f) d.setAttribute('data-font-size', JSON.parse(f));
+        var p = JSON.parse(s.getItem('wired_theme'));
+        if (!p) {
+          var t = s.getItem('wired_darkMode');
+          var dark = t !== null ? JSON.parse(t)
+                                : matchMedia('(prefers-color-scheme: dark)').matches;
+          p = dark ? 'night' : 'paper';
+        }
+        d.setAttribute('data-palette', p);
+        d.setAttribute('data-theme', p === 'night' || p === 'black' ? 'dark' : 'light');
+        ['fontSize:font-size', 'leading:leading', 'margins:margins', 'typeface:typeface']
+          .forEach(function (pair) {
+            var k = pair.split(':'), v = s.getItem('wired_' + k[0]);
+            if (v) d.setAttribute('data-' + k[1], JSON.parse(v));
+          });
       } catch (e) {}
     })();
   </script>
@@ -41,17 +50,15 @@
       Wired Differently
     </a>
     <div class="nav__actions">
-      <button class="nav__btn" id="theme-toggle" aria-label="Toggle dark mode">
-        <svg class="icon-sun hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="5"/>
-          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
-                   M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      <button class="nav__btn" id="search-toggle" type="button" aria-label="Search the book"
+              aria-expanded="false" aria-controls="book-search-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4" stroke-linecap="round"></path>
         </svg>
-        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none"
-             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
+      </button>
+      <button class="nav__btn nav__btn--aa" id="reader-settings-btn" type="button"
+              aria-label="Reading settings" aria-haspopup="dialog" aria-expanded="false">
+        <span aria-hidden="true">A<span class="nav__aa-small">a</span></span>
       </button>
     </div>
   </nav>
@@ -61,21 +68,29 @@
 
       <!-- Header -->
       <header class="toc__header fade-in">
-        <p class="toc__header-eyebrow">Table of Contents</p>
-        <h1 class="toc__header-title">Wired Differently</h1>
-        <p class="toc__header-subtitle">A Practical Manual for Adults with High IQ and ADHD</p>
+        <a class="toc__cover" href="index.html" aria-label="Back to the cover">
+          <img src="images/bookcover.webp" width="1024" height="1536" alt="" decoding="async" />
+        </a>
+        <div class="toc__header-text">
+          <p class="toc__header-eyebrow">Contents</p>
+          <h1 class="toc__header-title">Wired Differently</h1>
+          <p class="toc__header-subtitle">A Practical Manual for Adults with High IQ and ADHD</p>
 
-        <!-- Reading progress -->
-        <div class="toc__progress-bar-wrap" aria-label="Reading progress">
-          <div class="toc__progress-bar" role="progressbar" aria-valuemin="0"
-               aria-valuemax="100" id="toc-progress-fill-wrap">
-            <div class="toc__progress-fill" id="toc-progress-fill"></div>
+          <!-- Reading progress -->
+          <div class="toc__progress-bar-wrap">
+            <div class="toc__progress-bar" role="progressbar" aria-label="Reading progress"
+                 aria-valuemin="0" aria-valuemax="100" id="toc-progress-fill-wrap">
+              <div class="toc__progress-fill" id="toc-progress-fill"></div>
+            </div>
+            <span class="toc__progress-label" id="toc-progress-label">0% complete</span>
           </div>
-          <span class="toc__progress-label" id="toc-progress-label">0% complete</span>
         </div>
       </header>
 
-      <section class="reader-tools fade-in" aria-labelledby="search-heading">
+      <!-- Continue reading — filled by JS for returning readers -->
+      <div class="toc__continue" id="toc-continue" hidden></div>
+
+      <section class="reader-tools" id="book-search-panel" aria-labelledby="search-heading">
         <h2 class="sr-only" id="search-heading">Search this book</h2>
         <label class="reader-tools__search-label" for="book-search">Find a topic in the book</label>
         <div class="reader-tools__search-wrap">
