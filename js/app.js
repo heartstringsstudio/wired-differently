@@ -22,6 +22,8 @@ const LS = {
   MARGINS:       'wired_margins',
   TYPEFACE:      'wired_typeface',
   IMMERSIVE_HINT:'wired_immersiveHint',
+  HIGHLIGHTS:    'wired_highlights_',
+  HL_COLOR:      'wired_hlColor',
 };
 
 /* mins: reading time at ReadingTime.WPM with form text excluded — the
@@ -699,6 +701,40 @@ const TOCState = {
 };
 
 /* ============================================================
+   Notebook (contents page) — every highlight and note, by chapter,
+   each linking straight back to its passage
+   ============================================================ */
+const Notebook = {
+  init() {
+    const box = document.getElementById('toc-notebook');
+    const list = document.getElementById('notebook-list');
+    if (!box || !list) return;
+    const groups = CHAPTERS
+      .map(ch => ({ ch, items: Highlights.load(ch.id).sort((a, b) => a.start - b.start) }))
+      .filter(g => g.items.length);
+    const total = groups.reduce((n, g) => n + g.items.length, 0);
+    if (!total) return;
+    const notes = groups.reduce((n, g) => n + g.items.filter(h => h.note).length, 0);
+    document.getElementById('notebook-count').textContent =
+      `${total} highlight${total === 1 ? '' : 's'}${notes ? ` · ${notes} note${notes === 1 ? '' : 's'}` : ''}`;
+    const esc = s => BookSearch.escape(s);
+    list.innerHTML = groups.map(({ ch, items }) => `
+      <li class="notebook__chapter">
+        <p class="notebook__chapter-title"><span>${ch.num}</span> ${esc(ch.title)}</p>
+        <ol class="notebook__items">
+          ${items.map(h => `
+          <li><a class="notebook__item notebook__item--${Highlights.COLORS.includes(h.color) ? h.color : 'yellow'}"
+                 href="${Paths.chapter(ch.id)}#hl=${encodeURIComponent(h.id)}">
+            <span class="notebook__quote">${esc(h.quote)}</span>
+            ${h.note ? `<span class="notebook__note">${esc(h.note)}</span>` : ''}
+          </a></li>`).join('')}
+        </ol>
+      </li>`).join('');
+    box.hidden = false;
+  }
+};
+
+/* ============================================================
    Search toggle (contents page) — search lives behind the nav's
    magnifier so the book leads; "/" opens it from the keyboard
    ============================================================ */
@@ -947,7 +983,8 @@ const Immersive = {
     document.addEventListener('pointerdown', e => { this.pointerType = e.pointerType; }, { passive: true });
     document.addEventListener('click', e => {
       if (this.pointerType !== 'touch' && this.pointerType !== 'pen') return;
-      if (e.target.closest('a, button, input, textarea, select, label, summary, dialog, .nav, [contenteditable]')) return;
+      if (e.target.closest('a, button, input, textarea, select, label, summary, dialog, .nav, [contenteditable], mark.hl, .hl-toolbar')) return;
+      if (Highlights.toolbarOpen()) return;
       if (!window.getSelection()?.isCollapsed) return;
       if (window.scrollY < 96) return;
       this.active ? this.show() : this.hide();
@@ -1017,6 +1054,7 @@ const TouchNav = {
     }, { passive: true });
     document.addEventListener('touchend', e => {
       if (this.startedOnControl || e.changedTouches.length !== 1) return;
+      if (!window.getSelection()?.isCollapsed) return; // adjusting a selection
       const dx = e.changedTouches[0].clientX - this.startX;
       const dy = e.changedTouches[0].clientY - this.startY;
       if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
@@ -1055,6 +1093,68 @@ const SearchText = {
   },
   findLink(chId, query, hit) {
     return `${Paths.chapter(chId)}#${new URLSearchParams({ find: query, hit: String(hit) })}`;
+  }
+};
+
+/* ============================================================
+   Text Ranges — character offsets over a chapter's reading text.
+   Search hits and saved highlights are both stored as [start, end)
+   offsets into the concatenated text nodes (form controls skipped),
+   which stay stable however the DOM is later split by <mark>s.
+   ============================================================ */
+const TextRanges = {
+  collect(container) {
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => n.parentElement.closest(SearchText.SKIP)
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+    });
+    const nodes = [];
+    let text = '';
+    while (walker.nextNode()) {
+      nodes.push({ node: walker.currentNode, start: text.length, len: walker.currentNode.nodeValue.length });
+      text += walker.currentNode.nodeValue;
+    }
+    return { nodes, text };
+  },
+
+  // A DOM boundary point -> character offset
+  pointToOffset({ nodes, text }, node, offset) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const hit = nodes.find(n => n.node === node);
+      if (hit) return hit.start + Math.min(offset, hit.len);
+    }
+    const point = document.createRange();
+    point.setStart(node, offset);
+    for (const n of nodes) {
+      if (point.comparePoint(n.node, 0) >= 0) return n.start; // first text at/after it
+    }
+    return text.length;
+  },
+
+  // Whitespace-only text between blocks (list items, paragraphs) is
+  // layout, not reading text; wrapping it would paint stray bars
+  BLOCKS: 'ul, ol, div, section, article, table, thead, tbody, tr, blockquote, fieldset, header',
+
+  // Wrap [start, end) in elements from make(); returns them in order
+  wrap(container, start, end, make) {
+    const { nodes } = this.collect(container);
+    const made = [];
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const { node, start: s, len } = nodes[i];
+      if (s >= end || s + len <= start) continue;
+      const from = Math.max(0, start - s);
+      const to = Math.min(len, end - s);
+      if (to <= from) continue;
+      const piece = node.nodeValue.slice(from, to);
+      if (!piece.trim() && (node.parentElement === container || node.parentElement.matches(this.BLOCKS))) continue;
+      const range = document.createRange();
+      range.setStart(node, from);
+      range.setEnd(node, to);
+      const el = make();
+      range.surroundContents(el);
+      made.unshift(el);
+    }
+    return made;
   }
 };
 
@@ -1173,16 +1273,7 @@ const FindInChapter = {
   },
 
   highlight(query) {
-    const walker = document.createTreeWalker(this.content, NodeFilter.SHOW_TEXT, {
-      acceptNode: n => n.parentElement.closest(SearchText.SKIP)
-        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
-    });
-    const nodes = [];
-    let text = '';
-    while (walker.nextNode()) {
-      nodes.push({ node: walker.currentNode, start: text.length, len: walker.currentNode.nodeValue.length });
-      text += walker.currentNode.nodeValue;
-    }
+    const { nodes, text } = TextRanges.collect(this.content);
     const hits = SearchText.hits(text, query);
     // Wrap right-to-left: splitting a text node keeps its earlier part in
     // the original node, so offsets still to be processed stay valid
@@ -1500,6 +1591,403 @@ const ChapterEnd = {
 };
 
 /* ============================================================
+   Highlights & Notes
+   Select text -> a small toolbar offers four colours, a note and copy.
+   Tap a highlight to recolour, annotate, copy or delete it (with undo).
+   Stored per chapter as character offsets plus the quoted text, which
+   is used to re-find the passage if offsets ever drift.
+   #hl=<id> links (from the contents notebook) land on a highlight.
+   ============================================================ */
+const Highlights = {
+  COLORS: ['yellow', 'blue', 'green', 'pink'],
+  chId: null,
+  items: [],
+  pending: null,   // { start, end } of a fresh selection
+  editing: null,   // id of the highlight whose toolbar is open
+
+  key(chId = this.chId) { return LS.HIGHLIGHTS + chId; },
+  load(chId) { return Storage.get(this.key(chId), []).filter(h => h && Number.isFinite(h.start)); },
+  save() { Storage.set(this.key(), this.items); },
+  newId() { return 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); },
+  color() {
+    const c = Storage.get(LS.HL_COLOR);
+    return this.COLORS.includes(c) ? c : 'yellow';
+  },
+  normalize(text) { return text.replace(/\s+/g, ' ').trim(); },
+
+  // Returns true when a #hl= link decided where the page lands
+  init(chId) {
+    this.content = document.getElementById('chapter-content');
+    if (!this.content) return false;
+    this.chId = chId;
+    this.items = this.load(chId);
+    this.render();
+    this.buildToolbar();
+
+    let timer;
+    document.addEventListener('selectionchange', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => this.onSelection(), 160);
+    });
+    this.content.addEventListener('click', e => {
+      const mark = e.target.closest('mark.hl');
+      if (!mark || !window.getSelection()?.isCollapsed) return;
+      e.preventDefault();
+      this.openFor(mark.dataset.hlId);
+    });
+    document.addEventListener('pointerdown', e => {
+      if (!e.target.closest('.hl-toolbar, mark.hl')) this.pointerOnToolbar = false;
+    }, true);
+    document.addEventListener('click', e => {
+      if (this.editing && !e.target.closest('.hl-toolbar, mark.hl')) this.hideToolbar();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && this.toolbarOpen()) this.hideToolbar();
+    });
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!this.toolbarOpen() || ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { this.position(); ticking = false; });
+    }, { passive: true });
+
+    return this.land();
+  },
+
+  land() {
+    const hash = window.location.hash.slice(1);
+    if (!hash.startsWith('hl=')) return false;
+    const id = new URLSearchParams(hash).get('hl');
+    const first = this.marks(id)[0];
+    history.replaceState(history.state, '', window.location.pathname + window.location.search);
+    if (!first) return false;
+    const go = () => requestAnimationFrame(() => {
+      const root = document.documentElement;
+      root.style.scrollBehavior = 'auto';
+      first.scrollIntoView({ block: 'center' });
+      root.style.scrollBehavior = '';
+      this.marks(id).forEach(m => m.classList.add('is-flash'));
+    });
+    if (document.fonts?.ready) document.fonts.ready.then(go); else go();
+    return true;
+  },
+
+  marks(id) {
+    return Array.from(this.content.querySelectorAll(`mark.hl[data-hl-id="${CSS.escape(id || '')}"]`));
+  },
+
+  // Re-find a highlight whose stored offsets no longer match its quote
+  locate(h, text) {
+    if (this.normalize(text.slice(h.start, h.end)) === h.quote) return h;
+    const words = h.quote.split(' ').map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const re = new RegExp(words.join('\\s+'), 'g');
+    let best = null, m;
+    while ((m = re.exec(text))) {
+      if (!best || Math.abs(m.index - h.start) < Math.abs(best.start - h.start)) {
+        best = { ...h, start: m.index, end: m.index + m[0].length };
+      }
+    }
+    return best;
+  },
+
+  render() {
+    this.content.querySelectorAll('mark.hl').forEach(m => m.replaceWith(...m.childNodes));
+    this.content.normalize();
+    const { text } = TextRanges.collect(this.content);
+    let moved = false;
+    this.items.forEach((h, i) => {
+      const at = this.locate(h, text);
+      if (!at) return; // passage no longer in the chapter; kept, not shown
+      if (at.start !== h.start) { this.items[i] = at; moved = true; }
+      const marks = TextRanges.wrap(this.content, at.start, at.end, () => {
+        const m = document.createElement('mark');
+        m.className = `hl hl--${this.COLORS.includes(at.color) ? at.color : 'yellow'}`;
+        m.dataset.hlId = at.id;
+        return m;
+      });
+      if (at.note && marks.length) {
+        const last = marks[marks.length - 1];
+        last.classList.add('hl--note');
+        last.setAttribute('aria-label', `Note: ${at.note}`);
+      }
+    });
+    if (moved) this.save();
+  },
+
+  onSelection() {
+    const sel = window.getSelection();
+    if (this.editing) {
+      if (!sel || sel.isCollapsed) return;
+      this.hideToolbar(); // a new selection replaces the open highlight menu
+    }
+    if (!sel || !sel.rangeCount || sel.isCollapsed) {
+      if (!this.pointerOnToolbar) this.hideToolbar();
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    const within = range.commonAncestorContainer;
+    const el = within.nodeType === Node.ELEMENT_NODE ? within : within.parentElement;
+    if (!this.content.contains(el) || el.closest(SearchText.SKIP)) { this.hideToolbar(); return; }
+
+    const snapshot = TextRanges.collect(this.content);
+    let start = TextRanges.pointToOffset(snapshot, range.startContainer, range.startOffset);
+    let end = TextRanges.pointToOffset(snapshot, range.endContainer, range.endOffset);
+    const t = snapshot.text;
+    while (start < end && /\s/.test(t[start])) start++;
+    while (end > start && /\s/.test(t[end - 1])) end--;
+    // Snap to whole words, the way a book reader does
+    const word = /[\p{L}\p{N}'’-]/u;
+    while (start > 0 && word.test(t[start - 1]) && word.test(t[start])) start--;
+    while (end < t.length && word.test(t[end]) && word.test(t[end - 1])) end++;
+    if (end <= start) { this.hideToolbar(); return; }
+    this.pending = { start, end, quote: this.normalize(snapshot.text.slice(start, end)) };
+    this.showToolbar('new');
+  },
+
+  openFor(id) {
+    if (!this.items.some(h => h.id === id)) return;
+    this.pending = null;
+    this.editing = id;
+    this.showToolbar('edit');
+  },
+
+  // --- toolbar ------------------------------------------------------
+  buildToolbar() {
+    const bar = document.createElement('div');
+    bar.className = 'hl-toolbar';
+    bar.setAttribute('role', 'toolbar');
+    bar.setAttribute('aria-label', 'Highlight');
+    bar.hidden = true;
+    const icon = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+    bar.innerHTML = `
+      ${this.COLORS.map(c => `<button type="button" class="hl-swatch hl-swatch--${c}" data-color="${c}" aria-label="${c[0].toUpperCase() + c.slice(1)} highlight"></button>`).join('')}
+      <span class="hl-toolbar__sep" aria-hidden="true"></span>
+      <button type="button" class="hl-toolbar__btn" data-action="note" aria-label="Add note">${icon('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>')}</button>
+      <button type="button" class="hl-toolbar__btn" data-action="copy" aria-label="Copy passage">${icon('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>')}</button>
+      <button type="button" class="hl-toolbar__btn" data-action="delete" aria-label="Remove highlight">${icon('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>')}</button>`;
+    // Keep the text selection alive while a toolbar button is pressed
+    bar.addEventListener('pointerdown', e => { this.pointerOnToolbar = true; e.preventDefault(); });
+    bar.addEventListener('mousedown', e => e.preventDefault());
+    bar.addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      if (btn.dataset.color) this.applyColor(btn.dataset.color);
+      else if (btn.dataset.action === 'note') this.noteAction();
+      else if (btn.dataset.action === 'copy') this.copy();
+      else if (btn.dataset.action === 'delete') this.remove(this.editing);
+    });
+    document.body.appendChild(bar);
+    this.bar = bar;
+  },
+
+  toolbarOpen() { return Boolean(this.bar && !this.bar.hidden); },
+
+  showToolbar(mode) {
+    const current = mode === 'edit' ? this.items.find(h => h.id === this.editing) : null;
+    this.bar.querySelectorAll('.hl-swatch').forEach(b => {
+      const on = current ? b.dataset.color === current.color : false;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    this.bar.querySelector('[data-action="delete"]').hidden = mode !== 'edit';
+    this.bar.querySelector('[data-action="note"]').setAttribute('aria-label',
+      current?.note ? 'Edit note' : 'Add note');
+    this.bar.hidden = false;
+    document.body.classList.add('is-highlighting');
+    this.position();
+  },
+
+  hideToolbar() {
+    if (!this.bar || this.bar.hidden) return;
+    this.bar.hidden = true;
+    this.editing = null;
+    this.pointerOnToolbar = false;
+    document.body.classList.remove('is-highlighting');
+  },
+
+  // Below the passage on touch screens (the system copy menu sits above),
+  // above it with a mouse; flipped when there's no room
+  position() {
+    let rect = null;
+    if (this.editing) {
+      const marks = this.marks(this.editing);
+      if (marks.length) rect = marks[0].getBoundingClientRect();
+    } else {
+      const sel = window.getSelection();
+      if (sel?.rangeCount && !sel.isCollapsed) {
+        const rects = sel.getRangeAt(0).getClientRects();
+        rect = rects.length ? rects[rects.length - 1] : sel.getRangeAt(0).getBoundingClientRect();
+      }
+    }
+    if (!rect) return;
+    const bar = this.bar;
+    const touch = matchMedia('(pointer: coarse)').matches;
+    // Extra room on touch screens for the selection handles
+    const w = bar.offsetWidth, h = bar.offsetHeight, gap = touch ? 30 : 12;
+    let top = touch ? rect.bottom + gap : rect.top - h - gap;
+    if (top + h > window.innerHeight - 8) top = rect.top - h - gap;
+    if (top < 64) top = Math.min(window.innerHeight - h - 8, rect.bottom + gap);
+    // A selection running off-screen must not take the toolbar with it
+    top = Math.min(Math.max(top, 64), window.innerHeight - h - 8);
+    const left = Math.min(window.innerWidth - w - 8, Math.max(8, rect.left + rect.width / 2 - w / 2));
+    // top/left, not transform: the entrance animation owns transform
+    bar.style.left = `${Math.round(left)}px`;
+    bar.style.top = `${Math.round(top)}px`;
+  },
+
+  // --- actions ------------------------------------------------------
+  create(color) {
+    const { start, end, quote } = this.pending;
+    // Overlapping highlights merge into the new one (their notes carry over)
+    const overlaps = this.items.filter(h => h.start < end && h.end > start);
+    const s = Math.min(start, ...overlaps.map(h => h.start));
+    const e = Math.max(end, ...overlaps.map(h => h.end));
+    const { text } = TextRanges.collect(this.content);
+    const note = overlaps.map(h => h.note).filter(Boolean).join('\n\n');
+    const item = { id: this.newId(), start: s, end: e, quote: overlaps.length ? this.normalize(text.slice(s, e)) : quote, color, note, at: Date.now() };
+    this.items = this.items.filter(h => !overlaps.includes(h)).concat(item).sort((a, b) => a.start - b.start);
+    this.save();
+    this.render();
+    window.getSelection()?.removeAllRanges();
+    this.pending = null;
+    return item;
+  },
+
+  applyColor(color) {
+    Storage.set(LS.HL_COLOR, color);
+    if (this.editing) {
+      const h = this.items.find(x => x.id === this.editing);
+      if (h) { h.color = color; this.save(); this.render(); }
+    } else if (this.pending) {
+      this.create(color);
+    }
+    this.hideToolbar();
+  },
+
+  noteAction() {
+    let id = this.editing;
+    if (!id && this.pending) id = this.create(this.color()).id;
+    this.hideToolbar();
+    if (id) NoteSheet.open(id);
+  },
+
+  async copy() {
+    const h = this.editing ? this.items.find(x => x.id === this.editing) : this.pending;
+    if (!h) return;
+    const ch = CHAPTERS.find(c => c.id === this.chId);
+    const text = `“${h.quote}” — Wired Differently, Ch. ${ch?.num}: ${ch?.title}`;
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch { ok = false; }
+    if (!this.editing) window.getSelection()?.removeAllRanges();
+    this.hideToolbar();
+    Toast.show(ok ? 'Passage copied' : 'Copy isn’t available here');
+  },
+
+  remove(id) {
+    const index = this.items.findIndex(h => h.id === id);
+    if (index === -1) return;
+    const [gone] = this.items.splice(index, 1);
+    this.save();
+    this.render();
+    this.hideToolbar();
+    Toast.show(gone.note ? 'Highlight and note removed' : 'Highlight removed', 'Undo', () => {
+      this.items = this.items.concat(gone).sort((a, b) => a.start - b.start);
+      this.save();
+      this.render();
+    });
+  },
+
+  setNote(id, note) {
+    const h = this.items.find(x => x.id === id);
+    if (!h) return;
+    h.note = note.trim();
+    this.save();
+    this.render();
+  }
+};
+
+/* Note editor — a sheet with the quoted passage and a textarea.
+   Saves on Done, Esc or tapping outside. */
+const NoteSheet = {
+  dialog: null,
+  build() {
+    const d = document.createElement('dialog');
+    d.className = 'reader-settings note-sheet';
+    d.setAttribute('aria-labelledby', 'note-title');
+    d.innerHTML = `
+      <div class="reader-settings__inner">
+        <div class="reader-settings__grip" aria-hidden="true"></div>
+        <header class="reader-settings__head">
+          <h2 class="reader-settings__title" id="note-title">Note</h2>
+          <button type="button" class="reader-settings__done" data-close>Done</button>
+        </header>
+        <blockquote class="note-sheet__quote"></blockquote>
+        <label class="sr-only" for="note-text">Your note</label>
+        <textarea class="note-sheet__text" id="note-text" rows="5"
+                  placeholder="What does this bring up for you?"></textarea>
+        <button type="button" class="note-sheet__delete">Remove highlight</button>
+      </div>`;
+    d.addEventListener('click', e => {
+      if (e.target.closest('[data-close]') || e.target === d) d.close();
+      if (e.target.closest('.note-sheet__delete')) { this.deleted = true; d.close(); Highlights.remove(this.id); }
+    });
+    d.addEventListener('close', () => {
+      if (!this.deleted) Highlights.setNote(this.id, d.querySelector('textarea').value);
+    });
+    document.body.appendChild(d);
+    this.dialog = d;
+  },
+  open(id) {
+    const h = Highlights.items.find(x => x.id === id);
+    if (!h) return;
+    if (!this.dialog) this.build();
+    this.id = id;
+    this.deleted = false;
+    const d = this.dialog;
+    d.querySelector('.note-sheet__quote').textContent = h.quote;
+    d.querySelector('.note-sheet__quote').className = `note-sheet__quote note-sheet__quote--${h.color}`;
+    d.querySelector('textarea').value = h.note || '';
+    Immersive.show();
+    if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+    d.querySelector('textarea').focus();
+  },
+  isOpen() { return Boolean(this.dialog?.open); }
+};
+
+/* Small status toast with an optional action (e.g. Undo) */
+const Toast = {
+  show(message, actionLabel, action) {
+    this.el?.remove();
+    clearTimeout(this.timer);
+    const el = document.createElement('div');
+    el.className = 'reader-hint reader-toast';
+    el.setAttribute('role', 'status');
+    const text = document.createElement('span');
+    text.textContent = message;
+    el.appendChild(text);
+    if (actionLabel) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'reader-toast__action';
+      btn.textContent = actionLabel;
+      btn.addEventListener('click', () => { action(); this.hide(); });
+      el.appendChild(btn);
+    }
+    document.body.appendChild(el);
+    this.el = el;
+    requestAnimationFrame(() => el.classList.add('is-visible'));
+    this.timer = setTimeout(() => this.hide(), actionLabel ? 5000 : 2200);
+  },
+  hide() {
+    const el = this.el;
+    if (!el) return;
+    el.classList.remove('is-visible');
+    setTimeout(() => el.remove(), 300);
+    this.el = null;
+  }
+};
+
+/* ============================================================
    Reading Time — "18 min read" in the chapter header and a live
    "12 min left" under the chapter label in the nav
    ============================================================ */
@@ -1596,7 +2084,7 @@ const KeyboardNav = {
     document.addEventListener('keydown', e => {
       // Don't fire in inputs, or when a modifier is held
       if (e.target.matches('input, textarea, select')) return;
-      if (ReaderSettings.isOpen() || Sections.isOpen()) return;
+      if (ReaderSettings.isOpen() || Sections.isOpen() || NoteSheet.isOpen()) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // Left/Right turn pages; Up/Down are left alone for normal scrolling
       if (e.key === 'ArrowLeft') {
@@ -1635,6 +2123,7 @@ const App = {
     ReaderSettings.init();
     TOCState.init();
     BookmarkList.init();
+    Notebook.init();
     BookSearch.init();
     SearchToggle.init();
     DataPortability.init();
@@ -1649,8 +2138,9 @@ const App = {
     ReadingProgressBar.show();
     WorksheetPersist.init(chId);
     const landedOnSection = Sections.prepare();
+    const landedOnHighlight = Highlights.init(chId);
     const landedOnSearch = FindInChapter.init();
-    ScrollPersist.init(chId, { restore: !landedOnSearch && !landedOnSection });
+    ScrollPersist.init(chId, { restore: !landedOnSearch && !landedOnSection && !landedOnHighlight });
     AutoRead.init(chId);
     BookmarkUI.init(chId);
 

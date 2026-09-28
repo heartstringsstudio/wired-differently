@@ -37,7 +37,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
 
-  <link rel="stylesheet" href="css/style.css?v=20" />
+  <link rel="stylesheet" href="css/style.css?v=21" />
   <link rel="preload" href="fonts/lora-var.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/lora-var-italic.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/dmsans-var.woff2" as="font" type="font/woff2" crossorigin />
@@ -112,6 +112,19 @@
           <span class="toc__part-title">Bookmarks</span>
         </h2>
         <ol class="toc__list" id="bookmark-list" aria-label="Bookmarked chapters"></ol>
+      </section>
+
+      <!-- Highlights & notes — populated by JS, shown only when there are some -->
+      <section class="toc__notebook" id="toc-notebook" hidden aria-labelledby="notebook-heading">
+        <details class="notebook">
+          <summary class="toc__part-header notebook__summary">
+            <span class="toc__part-number" aria-hidden="true">✎</span>
+            <span id="notebook-heading">Highlights &amp; notes</span>
+            <span class="notebook__count" id="notebook-count"></span>
+            <svg class="notebook__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </summary>
+          <ol class="notebook__list" id="notebook-list"></ol>
+        </details>
       </section>
 
       <!-- ===================================================
@@ -661,7 +674,7 @@
     </div><!-- /.toc -->
   </main>
 
-  <script src="js/app.js?v=20"></script>
+  <script src="js/app.js?v=21"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       App.initTOC();

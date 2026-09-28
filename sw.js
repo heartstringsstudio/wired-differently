@@ -5,8 +5,8 @@
 
 // Pages link css/js as ?v=<ASSET_VERSION>. Bump both together on release
 // so a fresh page can never be paired with a stale stylesheet or script.
-const ASSET_VERSION = '20';
-const APP_CACHE = 'wired-differently-app-v20';
+const ASSET_VERSION = '21';
+const APP_CACHE = 'wired-differently-app-v21';
 const ASSET_CACHE = 'wired-differently-assets-v3';
 const CACHE_PREFIX = 'wired-differently-';
 
