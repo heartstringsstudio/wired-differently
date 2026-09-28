@@ -224,6 +224,12 @@ img, svg {
   max-width: 100%;
 }
 
+/* Keep the intrinsic ratio when CSS narrows an image that carries
+   width/height attributes (they're there to reserve layout space) */
+img {
+  height: auto;
+}
+
 a {
   color: var(--accent);
   text-decoration: none;
