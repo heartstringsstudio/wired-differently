@@ -90,6 +90,12 @@
   --shadow-md:       0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
   --shadow-lg:       0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
 
+  /* Highlight inks */
+  --hl-yellow:       rgba(240, 190, 66, 0.40);
+  --hl-blue:         rgba(61, 158, 216, 0.24);
+  --hl-green:        rgba(76, 175, 110, 0.26);
+  --hl-pink:         rgba(232, 106, 146, 0.24);
+
   /* Typography */
   --font-body:       'Lora', Georgia, 'Times New Roman', serif;
   --font-ui:         'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -145,6 +151,10 @@
   --shadow-sm:       0 1px 3px rgba(0,0,0,0.20);
   --shadow-md:       0 4px 12px rgba(0,0,0,0.30);
   --shadow-lg:       0 8px 24px rgba(0,0,0,0.40);
+  --hl-yellow:       rgba(240, 190, 66, 0.30);
+  --hl-blue:         rgba(98, 200, 242, 0.26);
+  --hl-green:        rgba(110, 200, 140, 0.24);
+  --hl-pink:         rgba(240, 130, 165, 0.28);
 }
 
 /* --- Reading palettes (layered on the light/dark base above) --- */
@@ -2431,6 +2441,323 @@ button.nav__chapter-label:disabled {
     margin: 0 auto;
     width: 420px;
   }
+}
+
+/* ============================================================
+   Highlights & Notes
+   ============================================================ */
+mark.hl {
+  color: inherit;
+  background: var(--hl-ink);
+  border-radius: 2px;
+  padding: 0.08em 0;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.hl--yellow { --hl-ink: var(--hl-yellow); }
+.hl--blue   { --hl-ink: var(--hl-blue); }
+.hl--green  { --hl-ink: var(--hl-green); }
+.hl--pink   { --hl-ink: var(--hl-pink); }
+
+/* A small gold dot marks passages that carry a note */
+mark.hl.hl--note::after {
+  content: '';
+  display: inline-block;
+  width: 0.4em;
+  height: 0.4em;
+  margin: 0 0.1em 0 0.15em;
+  vertical-align: super;
+  border-radius: 50%;
+  background: var(--highlight);
+}
+
+mark.hl.is-flash {
+  animation: hl-flash 900ms ease-in-out 2;
+}
+
+@keyframes hl-flash {
+  50% { box-shadow: 0 0 0 4px var(--hl-ink); }
+}
+
+.hl-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.35rem 0.3rem 0.5rem;
+  background: rgba(6, 16, 31, 0.97);
+  border: 1px solid rgba(98, 200, 242, 0.28);
+  border-radius: 100px;
+  box-shadow: var(--shadow-lg);
+  -webkit-user-select: none;
+  user-select: none;
+  animation: fadeIn 160ms ease both;
+}
+
+.hl-toolbar[hidden] { display: none; }
+
+.hl-swatch {
+  width: 32px;
+  height: 32px;
+  margin: 4px 2px;
+  border-radius: 50%;
+  border: 2px solid rgba(247, 243, 232, 0.25);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Swatches show the ink at full strength so they read on navy */
+.hl-swatch--yellow { background: #F0BE42; }
+.hl-swatch--blue   { background: #5AB3E8; }
+.hl-swatch--green  { background: #6CC08A; }
+.hl-swatch--pink   { background: #EE8AAA; }
+
+.hl-swatch:hover { transform: scale(1.08); }
+
+.hl-swatch.is-on {
+  border-color: var(--brand-cream);
+  box-shadow: 0 0 0 2px rgba(6, 16, 31, 0.97), 0 0 0 4px var(--brand-cream);
+}
+
+.hl-toolbar__sep {
+  width: 1px;
+  height: 24px;
+  margin: 0 0.25rem;
+  background: rgba(247, 243, 232, 0.2);
+}
+
+.hl-toolbar__btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-cream);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.hl-toolbar__btn[hidden] { display: none; }
+
+.hl-toolbar__btn:hover {
+  color: var(--brand-cyan);
+  background: rgba(98, 200, 242, 0.16);
+}
+
+.hl-toolbar__btn svg {
+  width: 19px;
+  height: 19px;
+}
+
+.hl-toolbar button:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+  outline-offset: 1px;
+}
+
+/* The toolbar owns the moment: tuck the bookmark button */
+.is-highlighting .bookmark-btn {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Note sheet */
+.note-sheet__quote {
+  margin: var(--space-md) 0;
+  padding: 0.5rem 0 0.5rem 0.875rem;
+  max-height: 7.5em;
+  overflow: auto;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--hl-ink, var(--hl-yellow));
+}
+
+.note-sheet__quote--yellow { --hl-ink: #F0BE42; }
+.note-sheet__quote--blue   { --hl-ink: #5AB3E8; }
+.note-sheet__quote--green  { --hl-ink: #6CC08A; }
+.note-sheet__quote--pink   { --hl-ink: #EE8AAA; }
+
+.note-sheet__text {
+  display: block;
+  width: 100%;
+  min-height: 7.5rem;
+  padding: 0.75rem 0.875rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  resize: vertical;
+}
+
+.note-sheet__text:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.note-sheet__delete {
+  display: block;
+  min-height: 44px;
+  margin: var(--space-sm) auto 0;
+  padding: 0 var(--space-md);
+  font: 500 0.8125rem var(--font-ui);
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.note-sheet__delete:hover { color: #C0392B; }
+
+/* Toasts reuse the hint pill (which ignores taps); they can carry an action */
+.reader-hint.reader-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  pointer-events: auto;
+}
+
+.reader-toast__action {
+  min-height: 32px;
+  padding: 0 0.625rem;
+  font: 700 0.8125rem var(--font-ui);
+  color: var(--brand-gold);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.reader-toast__action:focus-visible {
+  outline: 2px solid var(--brand-cyan);
+}
+
+/* Notebook on the contents page */
+.toc__notebook {
+  margin-bottom: var(--space-xl);
+}
+
+.toc__notebook[hidden] { display: none; }
+
+.notebook__summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.notebook__summary::-webkit-details-marker { display: none; }
+
+.notebook__count {
+  margin-left: auto;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.notebook__chevron {
+  align-self: center;
+  width: 14px;
+  height: 14px;
+  transition: transform var(--transition-fast);
+}
+
+.notebook[open] .notebook__chevron {
+  transform: rotate(180deg);
+}
+
+.notebook__summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.notebook__list,
+.notebook__items {
+  list-style: none;
+}
+
+.notebook__chapter {
+  padding: var(--space-md) 0 var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.notebook__chapter-title {
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.notebook__chapter-title span {
+  display: inline-block;
+  min-width: 1.75rem;
+  color: var(--highlight);
+}
+
+.notebook__item {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0 0 var(--space-sm) 1.75rem;
+  padding: 0.25rem 0 0.25rem 0.875rem;
+  color: var(--text-primary);
+  border-left: 3px solid var(--nb-ink);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: background var(--transition-fast);
+}
+
+.notebook__item:hover {
+  color: var(--text-primary);
+  background: var(--accent-faint);
+}
+
+.notebook__item--yellow { --nb-ink: #F0BE42; }
+.notebook__item--blue   { --nb-ink: #5AB3E8; }
+.notebook__item--green  { --nb-ink: #6CC08A; }
+.notebook__item--pink   { --nb-ink: #EE8AAA; }
+
+.notebook__quote {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.notebook__note {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  white-space: pre-line;
+}
+
+.notebook__note::before {
+  content: 'Note · ';
+  font-weight: 600;
+  color: var(--highlight);
+}
+
+@media print {
+  .hl-toolbar, .reader-toast { display: none !important; }
+  mark.hl { background: none; text-decoration: underline; }
+  mark.hl.hl--note::after { display: none; }
 }
 
 /* ============================================================
