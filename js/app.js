@@ -223,6 +223,21 @@ const Progress = {
   getPercent() {
     return Math.round((this.getCount() / CHAPTERS.length) * 100);
   },
+  // Reading time still ahead, from each unread chapter's minutes
+  minutesLeft() {
+    return CHAPTERS.filter(ch => !this.isRead(ch.id)).reduce((n, ch) => n + ch.mins, 0);
+  },
+  totalMinutes() {
+    return CHAPTERS.reduce((n, ch) => n + ch.mins, 0);
+  },
+  // 437 -> "about 7 hours"; 95 -> "about 1½ hours"; 40 -> "40 min"
+  describeMinutes(mins) {
+    if (mins < 60) return `${mins} min`;
+    const halves = Math.round(mins / 30) / 2;
+    const whole = Math.floor(halves);
+    const text = halves % 1 ? `${whole || ''}½` : String(whole);
+    return `about ${text} hour${halves > 1 ? 's' : ''}`;
+  },
   saveScroll(chId, position) {
     Storage.set(LS.SCROLL_PREFIX + chId, position);
   },
@@ -537,7 +552,7 @@ const BookmarkList = {
       <li class="toc__item bookmark-item" data-ch="${ch.id}">
         <a class="toc__link" href="${Paths.chapter(ch.id)}"
            aria-label="Bookmarked — Chapter ${ch.num}: ${this._esc(ch.title)}">
-          <span class="toc__ch-num">Ch. ${ch.num}</span>
+          <span class="toc__ch-num">${ch.num}</span>
           <span class="toc__ch-content">
             <span class="toc__ch-title">${this._esc(ch.title)}</span>
             <span class="toc__ch-subtitle">${this._esc(ch.subtitle)}</span>
@@ -566,6 +581,23 @@ const BookmarkList = {
    ============================================================ */
 const CoverResume = {
   init() {
+    const meta = document.getElementById('cover-meta');
+    if (meta) {
+      meta.textContent = `${CHAPTERS.length} chapters · ${Progress.describeMinutes(Progress.totalMinutes())}`;
+    }
+
+    // Returning readers: how far along, and what's left
+    const count = Progress.getCount();
+    const progress = document.getElementById('cover-progress');
+    if (progress && count > 0) {
+      document.getElementById('cover-progress-fill').style.transform = `scaleX(${count / CHAPTERS.length})`;
+      const left = Progress.minutesLeft();
+      document.getElementById('cover-progress-label').textContent = count === CHAPTERS.length
+        ? 'You’ve read every chapter'
+        : `${count} of ${CHAPTERS.length} chapters read · ${Progress.describeMinutes(left)} left`;
+      progress.hidden = false;
+    }
+
     const last = Progress.getLastChapter();
     if (!last) return;
     const ch = CHAPTERS.find(c => c.id === last);
@@ -576,7 +608,7 @@ const CoverResume = {
       <a href="${Paths.chapter(ch.id)}" target="_self" data-direct-nav class="cover__resume-btn"
          aria-label="Continue reading — Chapter ${ch.num}: ${ch.title}">
         <span class="cover__resume-btn-kicker">Continue reading</span>
-        <span class="cover__resume-btn-title">Ch. ${ch.num} — ${ch.title}</span>
+        <span class="cover__resume-btn-title">Ch. ${ch.num} · ${ch.title}</span>
       </a>`;
     el.classList.add('visible');
     // Returning readers resume; starting over becomes the secondary action
@@ -612,19 +644,90 @@ const EmbeddedBrowserCompat = {
 const TOCState = {
   init() {
     const last = Progress.getLastChapter();
-    // Mark read chapters
     document.querySelectorAll('.toc__link[data-ch]').forEach(link => {
-      const chId = link.dataset.ch;
-      if (Progress.isRead(chId)) link.classList.add('is-read');
-      if (chId === last) link.classList.add('is-current');
+      const ch = CHAPTERS.find(c => c.id === link.dataset.ch);
+      if (!ch) return;
+      const read = Progress.isRead(ch.id);
+      const current = ch.id === last;
+      link.classList.toggle('is-read', read);
+      link.classList.toggle('is-current', current);
+
+      // A book's contents: bare numerals, and a quiet time/status column
+      const num = link.querySelector('.toc__ch-num');
+      if (num) num.textContent = ch.num;
+      const meta = document.createElement('span');
+      meta.className = 'toc__ch-meta';
+      meta.textContent = current ? 'Reading' : `${ch.mins} min`;
+      link.querySelector('.toc__check')?.before(meta);
+      link.setAttribute('aria-label', `Chapter ${ch.num}: ${ch.title}, ${ch.mins} minutes` +
+        (read ? ', read' : '') + (current ? ', currently reading' : ''));
     });
-    // Update progress bar
+
+    // Progress summary
+    const count = Progress.getCount();
+    const pct = Progress.getPercent();
     const fill = document.getElementById('toc-progress-fill');
     const label = document.getElementById('toc-progress-label');
-    const pct = Progress.getPercent();
     if (fill) fill.style.width = pct + '%';
-    if (label) label.textContent = pct + '% complete';
-    document.getElementById('toc-progress-fill-wrap')?.setAttribute('aria-valuenow', String(pct));
+    if (label) {
+      label.textContent = count === 0
+        ? `${CHAPTERS.length} chapters · ${Progress.describeMinutes(Progress.totalMinutes())}`
+        : count === CHAPTERS.length
+          ? 'All chapters read'
+          : `${count} of ${CHAPTERS.length} read · ${Progress.describeMinutes(Progress.minutesLeft())} left`;
+    }
+    const bar = document.getElementById('toc-progress-fill-wrap');
+    bar?.setAttribute('aria-valuenow', String(pct));
+    // An empty bar reads as broken; new readers just see the book's size
+    if (bar) bar.hidden = count === 0;
+
+    this.renderContinue(last);
+  },
+
+  renderContinue(last) {
+    const box = document.getElementById('toc-continue');
+    const ch = last && CHAPTERS.find(c => c.id === last);
+    if (!box || !ch) return;
+    box.innerHTML = `
+      <a class="toc__continue-link" href="${Paths.chapter(ch.id)}">
+        <span class="toc__continue-kicker">Continue reading</span>
+        <span class="toc__continue-title">${ch.num} · ${BookSearch.escape(ch.title)}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>`;
+    box.hidden = false;
+  }
+};
+
+/* ============================================================
+   Search toggle (contents page) — search lives behind the nav's
+   magnifier so the book leads; "/" opens it from the keyboard
+   ============================================================ */
+const SearchToggle = {
+  init() {
+    this.btn = document.getElementById('search-toggle');
+    this.panel = document.getElementById('book-search-panel');
+    this.input = document.getElementById('book-search');
+    if (!this.btn || !this.panel || !this.input) return;
+    this.set(false);
+    this.btn.addEventListener('click', () => this.set(this.panel.hidden, true));
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && !e.target.matches('input, textarea, select') && !ReaderSettings.isOpen()) {
+        e.preventDefault();
+        this.set(true, true);
+      }
+      if (e.key === 'Escape' && e.target === this.input && !this.input.value) {
+        this.set(false);
+        this.btn.focus();
+      }
+    });
+  },
+  set(open, focus = false) {
+    this.panel.hidden = !open;
+    this.btn.setAttribute('aria-expanded', String(open));
+    if (open && focus) {
+      this.panel.scrollIntoView({ block: 'nearest' });
+      this.input.focus();
+    }
   }
 };
 
@@ -1533,6 +1636,7 @@ const App = {
     TOCState.init();
     BookmarkList.init();
     BookSearch.init();
+    SearchToggle.init();
     DataPortability.init();
     this._bindThemeToggle();
   },

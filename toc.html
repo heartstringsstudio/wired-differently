@@ -50,6 +50,12 @@
       Wired Differently
     </a>
     <div class="nav__actions">
+      <button class="nav__btn" id="search-toggle" type="button" aria-label="Search the book"
+              aria-expanded="false" aria-controls="book-search-panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4" stroke-linecap="round"></path>
+        </svg>
+      </button>
       <button class="nav__btn nav__btn--aa" id="reader-settings-btn" type="button"
               aria-label="Reading settings" aria-haspopup="dialog" aria-expanded="false">
         <span aria-hidden="true">A<span class="nav__aa-small">a</span></span>
@@ -62,21 +68,29 @@
 
       <!-- Header -->
       <header class="toc__header fade-in">
-        <p class="toc__header-eyebrow">Table of Contents</p>
-        <h1 class="toc__header-title">Wired Differently</h1>
-        <p class="toc__header-subtitle">A Practical Manual for Adults with High IQ and ADHD</p>
+        <a class="toc__cover" href="index.html" aria-label="Back to the cover">
+          <img src="images/bookcover.webp" width="1024" height="1536" alt="" decoding="async" />
+        </a>
+        <div class="toc__header-text">
+          <p class="toc__header-eyebrow">Contents</p>
+          <h1 class="toc__header-title">Wired Differently</h1>
+          <p class="toc__header-subtitle">A Practical Manual for Adults with High IQ and ADHD</p>
 
-        <!-- Reading progress -->
-        <div class="toc__progress-bar-wrap" aria-label="Reading progress">
-          <div class="toc__progress-bar" role="progressbar" aria-valuemin="0"
-               aria-valuemax="100" id="toc-progress-fill-wrap">
-            <div class="toc__progress-fill" id="toc-progress-fill"></div>
+          <!-- Reading progress -->
+          <div class="toc__progress-bar-wrap">
+            <div class="toc__progress-bar" role="progressbar" aria-label="Reading progress"
+                 aria-valuemin="0" aria-valuemax="100" id="toc-progress-fill-wrap">
+              <div class="toc__progress-fill" id="toc-progress-fill"></div>
+            </div>
+            <span class="toc__progress-label" id="toc-progress-label">0% complete</span>
           </div>
-          <span class="toc__progress-label" id="toc-progress-label">0% complete</span>
         </div>
       </header>
 
-      <section class="reader-tools fade-in" aria-labelledby="search-heading">
+      <!-- Continue reading — filled by JS for returning readers -->
+      <div class="toc__continue" id="toc-continue" hidden></div>
+
+      <section class="reader-tools" id="book-search-panel" aria-labelledby="search-heading">
         <h2 class="sr-only" id="search-heading">Search this book</h2>
         <label class="reader-tools__search-label" for="book-search">Find a topic in the book</label>
         <div class="reader-tools__search-wrap">
