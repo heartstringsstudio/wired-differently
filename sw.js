@@ -3,7 +3,10 @@
  * Fresh content online, complete-book fallback offline.
  */
 
-const APP_CACHE = 'wired-differently-app-v19';
+// Pages link css/js as ?v=<ASSET_VERSION>. Bump both together on release
+// so a fresh page can never be paired with a stale stylesheet or script.
+const ASSET_VERSION = '20';
+const APP_CACHE = 'wired-differently-app-v20';
 const ASSET_CACHE = 'wired-differently-assets-v3';
 const CACHE_PREFIX = 'wired-differently-';
 
@@ -15,9 +18,9 @@ const APP_FILES = [
   './toc.html',
   './offline.html',
   './manifest.json',
-  './css/style.css',
-  './css/print.css',
-  './js/app.js',
+  `./css/style.css?v=${ASSET_VERSION}`,
+  `./css/print.css?v=${ASSET_VERSION}`,
+  `./js/app.js?v=${ASSET_VERSION}`,
   ...Array.from({ length: 27 }, (_, i) =>
     `./chapters/ch${String(i + 1).padStart(2, '0')}.html`)
 ];
@@ -67,6 +70,23 @@ async function networkFirst(request) {
   }
 }
 
+// CSS/JS: network first so page and stylesheet always match online;
+// offline falls back to any cached copy, ignoring the ?v= tag
+async function networkFirstAsset(request) {
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      const cache = await caches.open(APP_CACHE);
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return (await caches.match(request)) ||
+      (await caches.match(request, { ignoreSearch: true })) ||
+      Response.error();
+  }
+}
+
 async function staleWhileRevalidate(request) {
   const cached = await caches.match(request);
   const refresh = fetch(request).then(async response => {
@@ -101,8 +121,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js') ||
-      url.pathname.endsWith('manifest.json')) {
+  if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
+    event.respondWith(networkFirstAsset(event.request));
+    return;
+  }
+
+  if (url.pathname.endsWith('manifest.json')) {
     event.respondWith(staleWhileRevalidate(event.request));
     return;
   }
